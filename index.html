@@ -9,33 +9,46 @@
     <link rel="stylesheet" href="./assets/css/main.css">
   </head>
   <body>
-    <div class="row">
-      <div class="col-lg-8 offset-lg-2 col-md-10 offset-md-1">
-        <h1>
-          ASD
-        </h1>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 offset-lg-2 col-md-10 offset-md-1">
+          <h1>
+            ASD
+          </h1>
 
-        <div id="player-container">
-          <div id="player"></div>
+          <div id="player-container">
+            <div id="player"></div>
+          </div>
+
+          <label>YouTube URL:
+            <input id="input-yt-url" list="dl-video-names"/>
+          </label>
+          <!--TODO: Implement functionality-->
+          <datalist id="dl-video-names"></datalist>
+
+          <button id="btn-load-yt-url">Load</button>
+          <br><br>
+          <button id="btn-start-loop">Start Loop</button>
+          <button id="btn-end-loop">End Loop</button>
+          <button id="btn-restart-loop">Restart Loop</button>
+          <button id="btn-save-section">Save Section</button>
+          <button id="btn-clear-loop">Clear Loop</button>
+
+          <!--
+            - Enable saving sections to FireCloud (or localStorage).
+            - Enable showing all saved sections for a URL.
+            - Enable showing all saved songs.
+            - Enable selecting saved song.
+            - Export data.
+            - Clear data.
+          -->
+
+          <ul id="ul-saved-sections"></ul>
         </div>
-
-        <!--TODO: Implement functionality-->
-        YouTube URL: <input id="input-yt-url"></input>
-        <br><br>
-        <button id="btn-start-loop">Start Loop</button>
-        <button id="btn-end-loop">End Loop</button>
-        <button id="btn-restart-loop">Restart Loop</button>
-        <button id="btn-auto-restart">Auto Restart</button>
-        <button id="btn-save-section">Save Section</button>
-        <!--
-          - Enable saving sections to FireCloud.
-          - Enable showing all saved sections for a URL.
-          - Enable showing all saved songs.
-          - Enable selecting saved song.
-        -->
-
       </div>
     </div>
   </body>
   <script src="./assets/js/load-iframe.js"></script>
+  <script src="./assets/js/ui.js"></script>
+  <script src="./assets/js/listen.js"></script>
 </html>
