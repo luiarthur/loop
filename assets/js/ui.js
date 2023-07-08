@@ -59,10 +59,10 @@ function setStore(videoId, newItem) {
   localStorage.setItem(videoId, JSON.stringify(info))
 }
 
-function removeStore(videoId, title) {
+function removeStore(videoId, name) {
   const info = getStore(videoId)
   info.loops.forEach((section, idx) => {
-    if (section.title == title) {
+    if (section.name == name) {
       info.loops.splice(idx, 1)
     }
   })
@@ -92,7 +92,7 @@ class Looper {
     const date = new Date()
 
     setStore(data.video_id, {
-      title: date.toISOString(),
+      name: date.toISOString(),
       start: round2(this.startTime),
       end: round2(this.endTime)
     })
@@ -121,11 +121,11 @@ function aComponent(name, idx, icon, listener) {
 
 function liComponent(section, idx) {
   const li = document.createElement("li")
-  li.setAttribute("title", section.title)
+  li.setAttribute("name", section.name)
   li.id = `li-${idx + 1}`
   li.classList.add("li-section")
   li.innerHTML = `
-    ${section.title} | start: ${section.start} | end: ${section.end}
+    ${section.name} | start: ${section.start} | end: ${section.end}
   `
   
   li.appendChild(aComponent("play", idx, "fa-play", playSection))
