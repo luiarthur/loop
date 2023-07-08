@@ -1,23 +1,28 @@
 console.log("Loaded ui.js")
 
-function clearASDStorage() {
-  localStorage.clear()
+function clearStorage() {
+  if (confirm("Delete saved data?")) {
+    localStorage.clear()
+  }
 }
 
 function populateVideos() {
   const datalist = document.getElementById("dl-video-names")
-  const video_ids = Object.keys(localStorage)
-  for (let id in video_ids) {
+  const videoIds = Object.keys(localStorage)
+  for (id of videoIds) {
     const info = JSON.parse(localStorage.getItem(id))
     const option = document.createElement("option")
     option.setAttribute("id", id)
+    console.log(info)
     option.value = info.title
+    console.log(option)
     option.addEventListener("click", () => {
-      // TODO
       // Play the selected video. 
       player.loadVideoById(id, 0)
-      LOOPER.reset()  // FIXME: This might jumping the gun before video is loaded.
-      showSavedSections(id)
+      setTimeout(() => {
+        LOOPER.reset()  // FIXME: This might jumping the gun before video is loaded.
+        showSavedSections(id)
+      }, 500);
     })
     datalist.appendChild(option)
   }
@@ -53,7 +58,7 @@ function getStore(videoId) {
   )
 }
 
-function setStore(videoId, newItem) {
+function appendStore(videoId, newItem) {
   const info = getStore(videoId)
   info.loops.push(newItem)
   localStorage.setItem(videoId, JSON.stringify(info))
@@ -85,19 +90,17 @@ class Looper {
   }
 
   save() {
-    const endTime = this.endTime === Infinity ? player.getDuration : this.endTime
+    // this.endTime = this.endTime === Infinity ? player.getDuration : this.endTime
     const data = player.getVideoData()
-    const info = getStore(data.video_id)
-
     const date = new Date()
 
-    setStore(data.video_id, {
+    appendStore(data.video_id, {
       name: date.toISOString(),
       start: round2(this.startTime),
       end: round2(this.endTime)
     })
 
-    showSavedSections()
+    showSavedSections(data.video_id)
   }
 }
 const LOOPER = new Looper()
@@ -135,10 +138,8 @@ function liComponent(section, idx) {
 }
 
 function showSavedSections(videoId) {
-  if (videoId === undefined) {
-    videoId = player.getVideoData().video_id
-  }
-  const info = getStore(videoId)
+  // const info = getStore(videoId)
+  const info = JSON.parse(localStorage.getItem(videoId))
   const savedSections = info.loops
 
   const ul = document.getElementById("ul-saved-sections")
@@ -154,27 +155,26 @@ function removeSection(clickedId) {
   const id = clickedId.split("-").pop()
   const li_id = `li-${id}`
   const elem = document.getElementById(li_id)
-  const title = elem.getAttribute("title")
+  const name = elem.getAttribute("name")
   elem.remove()
   console.log(`Clicked ${clickedId}`)
 
   // 2. Remove the record from storage.
   const data = player.getVideoData()
-  removeStore(data.video_id, title)
+  removeStore(data.video_id, name)
 }
 
 function playSection(clickedId) {
-  // TODO
   const videoId = player.getVideoData().video_id
   const info = getStore(videoId)
 
   const id = clickedId.split("-").pop()
   const li_id = `li-${id}`
   const elem = document.getElementById(li_id)
-  const title = elem.getAttribute("title")
+  const name = elem.getAttribute("name")
 
   for (section of info.loops) {
-    if (section.title == title) {
+    if (section.name == name) {
       LOOPER.startTime = section.start
       LOOPER.endTime = section.end
       player.seekTo(LOOPER.startTime)
@@ -247,20 +247,27 @@ addClickListener("btn-load-yt-url", () => {
   // If the title is provided in the URL box, find the appropriate id.
   let foundExisting = false
   const videoIds = Object.keys(localStorage)
-  for (let id in videoIds) {
-    const info = localStorage.getItem(id)
+  let id = null
+  for (vid of videoIds) {
+    const info = JSON.parse(localStorage.getItem(vid))
+    console.log(info)
     if (url == info.title) {
-      url = id
+      foundExisting = true
+      id = info.videoId
       break
     }
   }
 
-  const videoId = foundExisting ? url : url.split("/").pop()
+  const videoId = foundExisting ? id : url.split("/").pop()
   player.loadVideoById(videoId, 0)
-  LOOPER.reset()  // FIXME: This might jumping the gun before video is loaded.
-  showSavedSections(videoId)
+  setTimeout(() => {
+    getStore(videoId)
+    LOOPER.reset()  // FIXME: This might jumping the gun before video is loaded.
+    showSavedSections(videoId)
+  }, 500)
 })
 
+addClickListener("app-name", clearStorage)
 addClickListener("btn-restart-loop", restartLoop)
 addClickListener("btn-save-section", () => LOOPER.save())
 addClickListener("btn-clear-loop", () => LOOPER.reset())
