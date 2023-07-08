@@ -1,16 +1,17 @@
 console.log("Loaded ui.js")
 
 function clearASDStorage() {
-  localStorage.removeItem("asd")
+  localStorage.clear()
 }
 
 function populateVideos() {
-  const asd = JSON.parse(localStorage.getItem("asd"))
   const datalist = document.getElementById("dl-video-names")
-  for (let id in asd) {
+  const video_ids = Object.keys(localStorage)
+  for (let id in video_ids) {
+    const info = JSON.parse(localStorage.getItem(id))
     const option = document.createElement("option")
     option.setAttribute("id", id)
-    option.value = asd[id].title
+    option.value = info.title
     option.addEventListener("click", () => {
       // TODO
       // Play the selected video. 
@@ -23,12 +24,8 @@ function populateVideos() {
 }
 
 // Create localStorage if needed.
-if(localStorage.hasOwnProperty("asd")) {
-  console.log("localStorage already has key: 'asd'")
+if (localStorage !== null) {
   populateVideos()
-} else {
-  localStorage.setItem("asd", JSON.stringify({}))
-  console.log("Setting localStorage to {}")
 }
 
 function round2(x) {
@@ -37,34 +34,40 @@ function round2(x) {
 
 function getOr(obj, key, defaultValue) {
   if (!obj.hasOwnProperty(key)) {
-    obj[key] = defaultValue
+    obj.setItem(key, defaultValue)
   }
-  return obj[key]
+  return obj.getItem(key)
 }
 
 function getStore(videoId) {
-  let asd = JSON.parse(localStorage.getItem("asd"))
-  getOr(asd, videoId, {
-    title: player.getVideoData().title,
-    videoId: videoId,
-    loops: []
-  })
-  return asd
+  return JSON.parse(
+    getOr(
+      localStorage,
+      videoId,
+      JSON.stringify({
+        title: player.getVideoData().title,
+        videoId: videoId,
+        loops: []
+      })
+    )
+  )
 }
 
-function setStore(videoId, asd, newItem) {
-  asd[videoId].loops.push(newItem)
-  localStorage.setItem("asd", JSON.stringify(asd))
+function setStore(videoId, newItem) {
+  const info = getStore(videoId)
+  info.loops.push(newItem)
+  localStorage.setItem(videoId, JSON.stringify(info))
 }
 
-function removeStore(videoId, asd, title) {
-  asd[videoId].forEach((section, idx) => {
+function removeStore(videoId, title) {
+  const info = getStore(videoId)
+  info.loops.forEach((section, idx) => {
     if (section.title == title) {
-      asd[videoId].loops.splice(idx, 1)
+      info.loops.splice(idx, 1)
     }
   })
-  console.log(asd)
-  localStorage.setItem("asd", JSON.stringify(asd))
+
+  localStorage.setItem(videoId, JSON.stringify(info))
 }
 
 class Looper {
@@ -84,11 +87,11 @@ class Looper {
   save() {
     const endTime = this.endTime === Infinity ? player.getDuration : this.endTime
     const data = player.getVideoData()
-    const asd = getStore(data.video_id)
+    const info = getStore(data.video_id)
 
     const date = new Date()
 
-    setStore(data.video_id, asd, {
+    setStore(data.video_id, {
       title: date.toISOString(),
       start: round2(this.startTime),
       end: round2(this.endTime)
@@ -135,8 +138,8 @@ function showSavedSections(videoId) {
   if (videoId === undefined) {
     videoId = player.getVideoData().video_id
   }
-  const asd = JSON.parse(localStorage.getItem("asd"))
-  const savedSections = asd[videoId].loops
+  const info = getStore(videoId)
+  const savedSections = info.loops
 
   const ul = document.getElementById("ul-saved-sections")
   ul.innerHTML = ""
@@ -157,20 +160,20 @@ function removeSection(clickedId) {
 
   // 2. Remove the record from storage.
   const data = player.getVideoData()
-  removeStore(data.video_id, getStore(data.video_id), title)
+  removeStore(data.video_id, title)
 }
 
 function playSection(clickedId) {
   // TODO
   const videoId = player.getVideoData().video_id
-  const asd = getStore(videoId)
+  const info = getStore(videoId)
 
   const id = clickedId.split("-").pop()
   const li_id = `li-${id}`
   const elem = document.getElementById(li_id)
   const title = elem.getAttribute("title")
 
-  for (section of asd[videoId].loops) {
+  for (section of info.loops) {
     if (section.title == title) {
       LOOPER.startTime = section.start
       LOOPER.endTime = section.end
@@ -239,13 +242,14 @@ addClickListener("btn-end-loop", () => {
 
 
 addClickListener("btn-load-yt-url", () => {
-  const asd = JSON.parse(localStorage.getItem("asd"))
   let url = document.getElementById("input-yt-url").value
 
   // If the title is provided in the URL box, find the appropriate id.
   let foundExisting = false
-  for (let id in asd) {
-    if (url == asd[id].title) {
+  const videoIds = Object.keys(localStorage)
+  for (let id in videoIds) {
+    const info = localStorage.getItem(id)
+    if (url == info.title) {
       url = id
       break
     }
