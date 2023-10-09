@@ -1,3 +1,9 @@
+/* TODO:
+- [X] Remove setTimeout
+- [ ] The name of the loops should just be the start and end times.
+      Because that is unique.
+*/
+
 console.log("Loaded ui.js")
 
 function clearStorage() {
@@ -19,10 +25,6 @@ function populateVideos() {
     option.addEventListener("click", () => {
       // Play the selected video. 
       player.loadVideoById(id, 0)
-      setTimeout(() => {
-        LOOPER.reset()  // FIXME: This might jumping the gun before video is loaded.
-        showSavedSections(id)
-      }, 500);
     })
     datalist.appendChild(option)
   }
@@ -128,7 +130,7 @@ function liComponent(section, idx) {
   li.id = `li-${idx + 1}`
   li.classList.add("li-section")
   li.innerHTML = `
-    ${section.name} | start: ${section.start} | end: ${section.end}
+    start: ${section.start} | end: ${section.end}
   `
   
   li.appendChild(aComponent("play", idx, "fa-play", playSection))
@@ -138,16 +140,21 @@ function liComponent(section, idx) {
 }
 
 function showSavedSections(videoId) {
-  // const info = getStore(videoId)
-  const info = JSON.parse(localStorage.getItem(videoId))
-  const savedSections = info.loops
-
+  // Clean section first.
   const ul = document.getElementById("ul-saved-sections")
   ul.innerHTML = ""
 
-  savedSections.forEach((section, idx) => {
-    ul.appendChild(liComponent(section, idx))
-  })
+  if (localStorage.getItem(videoId) !== null) {
+    const info = JSON.parse(localStorage.getItem(videoId))
+    const savedSections = info.loops
+
+    const ul = document.getElementById("ul-saved-sections")
+    ul.innerHTML = ""
+
+    savedSections.forEach((section, idx) => {
+      ul.appendChild(liComponent(section, idx))
+    })
+  }
 }
 
 function removeSection(clickedId) {
@@ -260,11 +267,6 @@ addClickListener("btn-load-yt-url", () => {
 
   const videoId = foundExisting ? id : url.split("/").pop()
   player.loadVideoById(videoId, 0)
-  setTimeout(() => {
-    getStore(videoId)
-    LOOPER.reset()  // FIXME: This might jumping the gun before video is loaded.
-    showSavedSections(videoId)
-  }, 500)
 })
 
 addClickListener("app-name", clearStorage)

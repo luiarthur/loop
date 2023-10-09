@@ -4,7 +4,8 @@
 
 console.log("Loaded load-iframe.js")
 
-const videoID = "sK0J62VFC78" // Blue Serve -- Bill Evans
+// const videoID = "sK0J62VFC78" // Blue Serve -- Bill Evans
+const videoID = "JyjFCbB6qhA" // Dreamer -- Kiefer
 function videoURL(videoID) {
   return `https://www.youtube.com/v/${videoID}?version=3`
 }
@@ -29,13 +30,23 @@ function onYouTubeIframeAPIReady() {
       controls: 1,
     },
     events: {
-      onReady: onPlayerReady,
+      'onReady': onPlayerReady,
+      'onStateChange': onPlayerStateChange
     }
   });
 }
 
 // 4. The API will call this function when the video player is ready.
 function onPlayerReady(event) {
-  event.target.playVideo();
-  showSavedSections()
+  event.target.playVideo()
+  const video_id = player.getVideoData().video_id
+  showSavedSections(video_id)
+}
+
+function onPlayerStateChange(event) {
+  if (event.data == YT.PlayerState.PLAYING && player.getCurrentTime() < 0.1) {
+    LOOPER.reset()
+    const video_id = player.getVideoData().video_id
+    showSavedSections(video_id)
+  }
 }
