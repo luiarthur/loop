@@ -39,14 +39,17 @@ function onYouTubeIframeAPIReady() {
 // 4. The API will call this function when the video player is ready.
 function onPlayerReady(event) {
   event.target.playVideo()
-  const video_id = player.getVideoData().video_id
-  showSavedSections(video_id)
+  refreshSavedLoops(player.getVideoData().video_id)
 }
 
 function onPlayerStateChange(event) {
-  if (event.data == YT.PlayerState.UNSTARTED) {
+  const states = new Set([
+    YT.PlayerState.UNSTARTED,
+    YT.PlayerState.CUED,
+  ])
+
+  if (states.has(event.data)) {
+    refreshSavedLoops(player.getVideoData().video_id)
     LOOPER.reset()
-    const video_id = player.getVideoData().video_id
-    showSavedSections(video_id)
   }
 }

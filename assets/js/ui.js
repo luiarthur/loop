@@ -69,8 +69,8 @@ function appendStore(videoId, newItem) {
 
 function removeStore(videoId, name) {
   const info = getStore(videoId)
-  info.loops.forEach((section, idx) => {
-    if (section.name == name) {
+  info.loops.forEach((loop, idx) => {
+    if (loop.name == name) {
       info.loops.splice(idx, 1)
     }
   })
@@ -82,7 +82,7 @@ class Looper {
   constructor() {
     this.startTime = 0
     this.endTime = Infinity
-    this.sectionName = null
+    this.loopName = null
   }
 
   reset() {
@@ -103,7 +103,7 @@ class Looper {
       end: round2(this.endTime)
     })
 
-    showSavedSections(data.video_id)
+    refreshSavedLoops(data.video_id)
   }
 }
 const LOOPER = new Looper()
@@ -125,54 +125,54 @@ function aComponent(name, idx, icon, listener) {
   return a
 }
 
-function liComponent(section, idx) {
+function liComponent(loop, idx) {
   const li = document.createElement("li")
-  li.setAttribute("name", section.name)
+  li.setAttribute("name", loop.name)
   li.id = `li-${idx + 1}`
-  li.classList.add("li-section")
-  li.innerHTML = `
-    start: ${section.start} | end: ${section.end}
-  `
+  li.classList.add("li-loop")
+  li.innerHTML = `${loop.start} - ${loop.end} `
   
-  li.appendChild(aComponent("play", idx, "fa-play", playSection))
-  li.appendChild(aComponent("edit", idx, "fa-pencil", editSection))
-  li.appendChild(aComponent("remove", idx, "fa-trash", removeSection))
+  li.appendChild(aComponent("play", idx, "fa-play", playLoop))
+  li.appendChild(aComponent("edit", idx, "fa-pencil", editLoop))
+  li.appendChild(aComponent("remove", idx, "fa-trash", removeLoop))
   return li
 }
 
-function showSavedSections(videoId) {
-  // Clean section first.
-  const ul = document.getElementById("ul-saved-sections")
+function refreshSavedLoops(videoId) {
+  // Clean loops first.
+  const ul = document.getElementById("ul-saved-loops")
   ul.innerHTML = ""
 
   if (localStorage.getItem(videoId) !== null) {
     const info = JSON.parse(localStorage.getItem(videoId))
-    const savedSections = info.loops
+    const savedLoops = info.loops
 
-    const ul = document.getElementById("ul-saved-sections")
+    const ul = document.getElementById("ul-saved-loops")
     ul.innerHTML = ""
 
-    savedSections.forEach((section, idx) => {
-      ul.appendChild(liComponent(section, idx))
+    savedLoops.forEach((loop, idx) => {
+      ul.appendChild(liComponent(loop, idx))
     })
   }
 }
 
-function removeSection(clickedId) {
-  // 1. Remove the list item from page.
-  const id = clickedId.split("-").pop()
-  const li_id = `li-${id}`
-  const elem = document.getElementById(li_id)
-  const name = elem.getAttribute("name")
-  elem.remove()
-  console.log(`Clicked ${clickedId}`)
+function removeLoop(clickedId) {
+  if (confirm("Delete loop?")) {
+    // 1. Remove the list item from page.
+    const id = clickedId.split("-").pop()
+    const li_id = `li-${id}`
+    const elem = document.getElementById(li_id)
+    const name = elem.getAttribute("name")
+    elem.remove()
+    console.log(`Clicked ${clickedId}`)
 
-  // 2. Remove the record from storage.
-  const data = player.getVideoData()
-  removeStore(data.video_id, name)
+    // 2. Remove the record from storage.
+    const data = player.getVideoData()
+    removeStore(data.video_id, name)
+  }
 }
 
-function playSection(clickedId) {
+function playLoop(clickedId) {
   const videoId = player.getVideoData().video_id
   const info = getStore(videoId)
 
@@ -181,10 +181,10 @@ function playSection(clickedId) {
   const elem = document.getElementById(li_id)
   const name = elem.getAttribute("name")
 
-  for (section of info.loops) {
-    if (section.name == name) {
-      LOOPER.startTime = section.start
-      LOOPER.endTime = section.end
+  for (loop of info.loops) {
+    if (loop.name == name) {
+      LOOPER.startTime = loop.start
+      LOOPER.endTime = loop.end
       player.seekTo(LOOPER.startTime)
       break
     }
@@ -193,7 +193,7 @@ function playSection(clickedId) {
   console.log(`Clicked ${clickedId}`)
 }
 
-function editSection(clickedId) {
+function editLoop(clickedId) {
   // TODO
   console.log(`Clicked ${clickedId}`)
 }
@@ -212,7 +212,7 @@ function restartLoop() {
 }
 
 // Show the list of tracks saved for current video.
-const saved_sections = document.getElementById("ul-saved-sections")
+const saved_loops = document.getElementById("ul-saved-loops")
 
 function addClickListener(id, f) {
   document.getElementById(id).addEventListener("click", f)
@@ -248,6 +248,13 @@ addClickListener("btn-end-loop", () => {
   console.log(`${LOOPER.startTime} ${LOOPER.endTime}`)
 })
 
+function getIdFromSharedUrl(url) {
+  const re = /youtu.be\/(\w+)/
+  const id = url.match(re)[1]
+  console.log(id)
+  return id
+}
+
 
 addClickListener("btn-load-yt-url", () => {
   let url = document.getElementById("input-yt-url").value
@@ -258,7 +265,6 @@ addClickListener("btn-load-yt-url", () => {
   let id = null
   for (vid of videoIds) {
     const info = JSON.parse(localStorage.getItem(vid))
-    console.log(info)
     if (url == info.title) {
       foundExisting = true
       id = info.videoId
@@ -266,25 +272,12 @@ addClickListener("btn-load-yt-url", () => {
     }
   }
 
-  const videoId = foundExisting ? id : url.split("/").pop()
+  const videoId = foundExisting ? id : getIdFromSharedUrl(url)
   LOOPER.reset()
   player.cueVideoById(videoId, 0)
-  showSavedSections()
 })
 
 addClickListener("app-name", clearStorage)
 addClickListener("btn-restart-loop", restartLoop)
-addClickListener("btn-save-section", () => LOOPER.save())
+addClickListener("btn-save-loop", () => LOOPER.save())
 addClickListener("btn-clear-loop", () => LOOPER.reset())
-
-/* For loading video with different url:
-  player.loadVideoByUrl("some-url", 0)
-
-  Or:
-
-  player.loadVideoByUrl({
-    mediaContentUrl: "some-url",
-    startSeconds: 0,
-    endSeconds=10
-  })
-*/
