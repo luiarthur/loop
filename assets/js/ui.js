@@ -24,7 +24,8 @@ function populateVideos() {
     console.log(option)
     option.addEventListener("click", () => {
       // Play the selected video. 
-      player.loadVideoById(id, 0)
+      LOOPER.reset()
+      player.cueVideoById(id, 0)
     })
     datalist.appendChild(option)
   }
@@ -266,7 +267,9 @@ addClickListener("btn-load-yt-url", () => {
   }
 
   const videoId = foundExisting ? id : url.split("/").pop()
-  player.loadVideoById(videoId, 0)
+  LOOPER.reset()
+  player.cueVideoById(videoId, 0)
+  showSavedSections()
 })
 
 addClickListener("app-name", clearStorage)

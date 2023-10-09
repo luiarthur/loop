@@ -44,7 +44,7 @@ function onPlayerReady(event) {
 }
 
 function onPlayerStateChange(event) {
-  if (event.data == YT.PlayerState.PLAYING && player.getCurrentTime() < 0.1) {
+  if (event.data == YT.PlayerState.UNSTARTED) {
     LOOPER.reset()
     const video_id = player.getVideoData().video_id
     showSavedSections(video_id)
