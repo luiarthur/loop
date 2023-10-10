@@ -114,7 +114,10 @@ function setHTMLById(id, html) {
 function loopItemComponent(name, idx, text, listener) {
   const button = document.createElement("button")
   button.id = `button-${name}-${idx + 1}`
-  button.classList.add("p-2", "flex-fill")
+  button.classList.add("p-2")
+  if (name == "play") {
+    button.classList.add("p-2", "flex-grow-1")
+  }
   button.addEventListener("click", () => listener(button.id))
   button.innerText = text
   return button
