@@ -1,2 +1,7 @@
+.ONESHELL:
+
+init:
+	which live-server || npm i -g live-server
+
 serve:
-	python3 -m http.server 8123
+	live-server

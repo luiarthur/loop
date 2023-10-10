@@ -23,7 +23,6 @@ function populateVideos() {
     option.value = info.title
     console.log(option)
     option.addEventListener("click", () => {
-      // Play the selected video. 
       LOOPER.reset()
       player.cueVideoById(id, 0)
     })
@@ -88,8 +87,8 @@ class Looper {
   reset() {
     this.startTime = 0
     this.endTime = player.getDuration()
-    setTextById("btn-start-loop", `Start Loop`)
-    setTextById("btn-end-loop", `End Loop`)
+    setTextById("btn-start-loop", `Start`)
+    setTextById("btn-end-loop", `End`)
   }
 
   save() {
@@ -112,46 +111,40 @@ function setHTMLById(id, html) {
   document.getElementById(id).innerHTML = html
 }
 
-function aComponent(name, idx, icon, listener) {
-  const i = document.createElement("i")
-  i.id = `i-${name}-${idx + 1}`
-  i.setAttribute("class", `fa fa-fw ${icon}`)
-  i.addEventListener("click", () => listener(i.id))
-
-  const a = document.createElement("a")
-  a.setAttribute("href", "#/")
-  a.appendChild(i)
-
-  return a
+function loopItemComponent(name, idx, text, listener) {
+  const button = document.createElement("button")
+  button.id = `button-${name}-${idx + 1}`
+  button.classList.add("p-2", "flex-fill")
+  button.addEventListener("click", () => listener(button.id))
+  button.innerText = text
+  return button
 }
 
-function liComponent(loop, idx) {
-  const li = document.createElement("li")
-  li.setAttribute("name", loop.name)
-  li.id = `li-${idx + 1}`
-  li.classList.add("li-loop")
-  li.innerHTML = `${loop.start} - ${loop.end} `
+function loopComponent(loop, idx) {
+  const div = document.createElement("div")
+  div.id = `div-saved-loop-${idx+1}`
+  div.setAttribute("name", loop.name)
+  div.classList.add("d-flex")
+  const timeRange = `${loop.start} - ${loop.end}`
   
-  li.appendChild(aComponent("play", idx, "fa-play", playLoop))
-  li.appendChild(aComponent("edit", idx, "fa-pencil", editLoop))
-  li.appendChild(aComponent("remove", idx, "fa-trash", removeLoop))
-  return li
+  div.appendChild(loopItemComponent("play", idx, timeRange, playLoop))
+  div.appendChild(loopItemComponent("edit", idx, "Edit", editLoop))
+  div.appendChild(loopItemComponent("remove", idx, "Remove", removeLoop))
+
+  return div
 }
 
 function refreshSavedLoops(videoId) {
   // Clean loops first.
-  const ul = document.getElementById("ul-saved-loops")
-  ul.innerHTML = ""
+  const div = document.getElementById("div-saved-loops")
+  div.innerHTML = ""
 
   if (localStorage.getItem(videoId) !== null) {
     const info = JSON.parse(localStorage.getItem(videoId))
     const savedLoops = info.loops
 
-    const ul = document.getElementById("ul-saved-loops")
-    ul.innerHTML = ""
-
     savedLoops.forEach((loop, idx) => {
-      ul.appendChild(liComponent(loop, idx))
+      div.appendChild(loopComponent(loop, idx))
     })
   }
 }
@@ -160,8 +153,9 @@ function removeLoop(clickedId) {
   if (confirm("Delete loop?")) {
     // 1. Remove the list item from page.
     const id = clickedId.split("-").pop()
-    const li_id = `li-${id}`
-    const elem = document.getElementById(li_id)
+    console.log(id)
+    const div_id = `div-saved-loop-${id}`
+    const elem = document.getElementById(div_id)
     const name = elem.getAttribute("name")
     elem.remove()
     console.log(`Clicked ${clickedId}`)
@@ -177,8 +171,9 @@ function playLoop(clickedId) {
   const info = getStore(videoId)
 
   const id = clickedId.split("-").pop()
-  const li_id = `li-${id}`
-  const elem = document.getElementById(li_id)
+  const div_id = `div-saved-loop-${id}`
+  const elem = document.getElementById(div_id)
+  console.log(elem)
   const name = elem.getAttribute("name")
 
   for (loop of info.loops) {
@@ -186,6 +181,7 @@ function playLoop(clickedId) {
       LOOPER.startTime = loop.start
       LOOPER.endTime = loop.end
       player.seekTo(LOOPER.startTime)
+      console.log("found!")
       break
     }
   }
@@ -227,9 +223,9 @@ addClickListener("btn-start-loop", () => {
   }
 
   if(currentTime < LOOPER.endTime) {
-    setTextById("btn-start-loop", `Start Loop (${round2(LOOPER.startTime)})`)
+    setTextById("btn-start-loop", `Start(${round2(LOOPER.startTime)})`)
   } else {
-    setTextById("btn-end-loop", `End Loop`)
+    setTextById("btn-end-loop", `End`)
   }
 
   console.log(`${LOOPER.startTime} ${LOOPER.endTime}`)
@@ -239,10 +235,10 @@ addClickListener("btn-end-loop", () => {
   const currentTime = player.getCurrentTime()
   LOOPER.endTime = currentTime
   if(LOOPER.startTime < currentTime) {
-    setTextById("btn-end-loop", `End Loop (${round2(currentTime)})`)
+    setTextById("btn-end-loop", `End(${round2(currentTime)})`)
   } else {
     LOOPER.startTime = 0
-    setTextById("btn-start-loop", `Start Loop`)
+    setTextById("btn-start-loop", `Start`)
   }
 
   console.log(`${LOOPER.startTime} ${LOOPER.endTime}`)

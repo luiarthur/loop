@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="ASD" content="Amazing Slow Downer">
     <title>ASD</title>
-    
     <link rel="stylesheet" href="./assets/css/main.css">
   </head>
   <body>
@@ -20,19 +19,25 @@
             <div id="player"></div>
           </div>
 
-          <label>YouTube URL:
+          <label>YouTube Short URL:
             <input id="input-yt-url" list="dl-video-names"/>
           </label>
-          <!--TODO: Implement functionality-->
           <datalist id="dl-video-names"></datalist>
 
           <button id="btn-load-yt-url">Load</button>
           <br><br>
-          <button id="btn-start-loop">Start</button>
-          <button id="btn-end-loop">End</button>
-          <button id="btn-restart-loop">Restart</button>
-          <button id="btn-save-loop">Save</button>
-          <button id="btn-clear-loop">Clear</button>
+
+          <div class="d-flex">
+            <button class="p-2 flex-fill" id="btn-start-loop">Start</button>
+            <button class="p-2 flex-fill" id="btn-end-loop">End</button>
+            <button class="p-2 flex-fill" id="btn-restart-loop">Restart</button>
+            <button class="p-2 flex-fill" id="btn-save-loop">Save</button>
+            <button class="p-2 flex-fill" id="btn-clear-loop">Clear</button>
+          </div>
+
+          <br>
+          <div id="div-saved-loops"></div>
+          <ul id="ul-saved-loops"></ul>
 
           <!--
             - Enable saving loops to FireCloud (or localStorage).
@@ -43,7 +48,6 @@
             - Clear data.
           -->
 
-          <ul id="ul-saved-loops"></ul>
         </div>
       </div>
     </div>
@@ -51,4 +55,5 @@
   <script src="./assets/js/load-iframe.js"></script>
   <script src="./assets/js/ui.js"></script>
   <script src="./assets/js/listen.js"></script>
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.3/js/bootstrap.min.js" integrity="sha512-1/RvZTcCDEUjY/CypiMz+iqqtaoQfAITmNSJY17Myp4Ms5mdxPS5UV7iOfdZoxcGhzFbOm6sntTKJppjvuhg4g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
 </html>
