@@ -276,7 +276,33 @@ addClickListener("btn-load-yt-url", () => {
   player.cueVideoById(videoId, 0)
 })
 
+function exportData() {
+  // Copy localStorage to clipboard.
+  // https://www.w3schools.com/howto/howto_js_copy_clipboard.asp
+  navigator.clipboard.writeText(
+    JSON.stringify(localStorage)
+  )
+  console.log("Copied data to clipboard!")
+  alert("App data copied to clipboard!")
+}
+
+async function importData() {
+  if (confirm("Import data from clipboard?")) {
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/await
+    // https://stackoverflow.com/questions/13335967/export-data-in-localstorage-for-later-re-import
+    const strData = await navigator.clipboard.readText()
+    const data = JSON.parse(strData)
+    Object.keys(data).forEach((k) => {
+      localStorage.setItem(k, data[k])
+    })
+    console.log("Imported data from clipboard!")
+    refreshSavedLoops(player.getVideoData().video_id)
+  }
+}
+
 addClickListener("app-name", clearStorage)
 addClickListener("btn-restart-loop", restartLoop)
 addClickListener("btn-save-loop", () => LOOPER.save())
 addClickListener("btn-clear-loop", () => LOOPER.reset())
+addClickListener("btn-export-data", exportData)
+addClickListener("btn-import-data", importData)
