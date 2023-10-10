@@ -9,6 +9,7 @@ console.log("Loaded ui.js")
 function clearStorage() {
   if (confirm("Delete saved data?")) {
     localStorage.clear()
+    refreshSavedLoops(player.getVideoData().video_id)
   }
 }
 
@@ -283,14 +284,15 @@ function exportData() {
     JSON.stringify(localStorage)
   )
   console.log("Copied data to clipboard!")
-  alert("App data copied to clipboard!")
+  alert("App data to copied to clipboard!")
 }
 
 async function importData() {
+  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/await
+  // https://stackoverflow.com/questions/13335967/export-data-in-localstorage-for-later-re-import
+  const strData = await navigator.clipboard.readText()
+
   if (confirm("Import data from clipboard?")) {
-    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/await
-    // https://stackoverflow.com/questions/13335967/export-data-in-localstorage-for-later-re-import
-    const strData = await navigator.clipboard.readText()
     const data = JSON.parse(strData)
     Object.keys(data).forEach((k) => {
       localStorage.setItem(k, data[k])
