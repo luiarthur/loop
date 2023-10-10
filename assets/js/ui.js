@@ -280,11 +280,15 @@ addClickListener("btn-load-yt-url", () => {
 function exportData() {
   // Copy localStorage to clipboard.
   // https://www.w3schools.com/howto/howto_js_copy_clipboard.asp
+  // https://stackoverflow.com/questions/69438702/why-does-navigator-clipboard-writetext-not-copy-text-to-clipboard-if-it-is-pro
   navigator.clipboard.writeText(
     JSON.stringify(localStorage)
-  )
-  console.log("Copied data to clipboard!")
-  alert("App data to copied to clipboard!")
+  ).then(() => {
+    console.log("Copied data to clipboard!")
+    alert("App data to copied to clipboard!")
+  }).catch(() => {
+    alert("something went wrong")
+  })
 }
 
 async function importData() {
