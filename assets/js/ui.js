@@ -6,10 +6,24 @@
 
 console.log("Loaded ui.js")
 
+function div(x, a) {
+    return Math.floor(x / a)
+}
+
+function round2(x) {
+  return Math.round((x + Number.EPSILON) * 100) / 100
+}
+
+function secondsToMinuteSeconds(seconds) {
+  const m = div(seconds, 60)
+  const s = Math.floor(seconds % 60)
+  return `${m}:${s.toString().padStart(2, "0")}`
+}
+
 function clearStorage() {
   if (confirm("Delete saved data?")) {
     localStorage.clear()
-    refreshSavedLoops(player.getVideoData().video_id)
+    refreshSavedLoops(PLAYER.getVideoData().video_id)
   }
 }
 
@@ -25,7 +39,7 @@ function populateVideos() {
     console.log(option)
     option.addEventListener("click", () => {
       LOOPER.reset()
-      player.cueVideoById(id, 0)
+      PLAYER.cueVideoById(id, 0)
     })
     datalist.appendChild(option)
   }
@@ -34,10 +48,6 @@ function populateVideos() {
 // Create localStorage if needed.
 if (localStorage !== null) {
   populateVideos()
-}
-
-function round2(x) {
-  return Math.round((x + Number.EPSILON) * 100) / 100
 }
 
 function getOr(obj, key, defaultValue) {
@@ -53,7 +63,7 @@ function getStore(videoId) {
       localStorage,
       videoId,
       JSON.stringify({
-        title: player.getVideoData().title,
+        title: PLAYER.getVideoData().title,
         videoId: videoId,
         loops: []
       })
@@ -78,35 +88,6 @@ function removeStore(videoId, name) {
   localStorage.setItem(videoId, JSON.stringify(info))
 }
 
-class Looper {
-  constructor() {
-    this.startTime = 0
-    this.endTime = Infinity
-    this.loopName = null
-  }
-
-  reset() {
-    this.startTime = 0
-    this.endTime = player.getDuration()
-    setTextById("btn-start-loop", `Start`)
-    setTextById("btn-end-loop", `End`)
-  }
-
-  save() {
-    // this.endTime = this.endTime === Infinity ? player.getDuration : this.endTime
-    const data = player.getVideoData()
-    const date = new Date()
-
-    appendStore(data.video_id, {
-      name: date.toISOString(),
-      start: round2(this.startTime),
-      end: round2(this.endTime)
-    })
-
-    refreshSavedLoops(data.video_id)
-  }
-}
-const LOOPER = new Looper()
 
 function setHTMLById(id, html) {
   document.getElementById(id).innerHTML = html
@@ -129,7 +110,9 @@ function loopComponent(loop, idx) {
   div.id = `div-saved-loop-${idx+1}`
   div.setAttribute("name", loop.name)
   div.classList.add("d-flex")
-  const timeRange = `${loop.start} - ${loop.end}`
+  const start = secondsToMinuteSeconds(loop.start)
+  const end = secondsToMinuteSeconds(loop.end)
+  const timeRange = `${start} - ${end}`
   
   div.appendChild(loopItemComponent("play", idx, timeRange, playLoop))
   div.appendChild(loopItemComponent("edit", idx, "Edit", editLoop))
@@ -165,13 +148,13 @@ function removeLoop(clickedId) {
     console.log(`Clicked ${clickedId}`)
 
     // 2. Remove the record from storage.
-    const data = player.getVideoData()
+    const data = PLAYER.getVideoData()
     removeStore(data.video_id, name)
   }
 }
 
 function playLoop(clickedId) {
-  const videoId = player.getVideoData().video_id
+  const videoId = PLAYER.getVideoData().video_id
   const info = getStore(videoId)
 
   const id = clickedId.split("-").pop()
@@ -184,7 +167,7 @@ function playLoop(clickedId) {
     if (loop.name == name) {
       LOOPER.startTime = loop.start
       LOOPER.endTime = loop.end
-      player.seekTo(LOOPER.startTime)
+      PLAYER.seekTo(LOOPER.startTime)
       console.log("found!")
       break
     }
@@ -208,7 +191,7 @@ function setTextById(id, text) {
 }
 
 function restartLoop() {
-  player.seekTo(LOOPER.startTime)
+  PLAYER.seekTo(LOOPER.startTime)
 }
 
 // Show the list of tracks saved for current video.
@@ -220,32 +203,28 @@ function addClickListener(id, f) {
 
 // Event Listeners.
 addClickListener("btn-start-loop", () => {
-  const currentTime = player.getCurrentTime()
-  LOOPER.startTime = currentTime
+  LOOPER.startTime = PLAYER.getCurrentTime()
   if (LOOPER.endTime === Infinity) {
-    LOOPER.endTime = player.getDuration()
+    LOOPER.endTime = PLAYER.getDuration()
   }
 
-  if(currentTime < LOOPER.endTime) {
-    setTextById("btn-start-loop", `Start(${round2(LOOPER.startTime)})`)
+  if(LOOPER.startTime < LOOPER.endTime) {
+    const start = secondsToMinuteSeconds(LOOPER.startTime)
+    setTextById("btn-start-loop", `Start (${start})`)
   } else {
     setTextById("btn-end-loop", `End`)
   }
-
-  console.log(`${LOOPER.startTime} ${LOOPER.endTime}`)
 })
 
 addClickListener("btn-end-loop", () => {
-  const currentTime = player.getCurrentTime()
-  LOOPER.endTime = currentTime
-  if(LOOPER.startTime < currentTime) {
-    setTextById("btn-end-loop", `End(${round2(currentTime)})`)
+  LOOPER.endTime = PLAYER.getCurrentTime()
+  if(LOOPER.startTime < LOOPER.endTime) {
+    const end = secondsToMinuteSeconds(LOOPER.endTime)
+    setTextById("btn-end-loop", `End (${end})`)
   } else {
     LOOPER.startTime = 0
     setTextById("btn-start-loop", `Start`)
   }
-
-  console.log(`${LOOPER.startTime} ${LOOPER.endTime}`)
 })
 
 function getIdFromSharedUrl(url) {
@@ -274,7 +253,7 @@ addClickListener("btn-load-yt-url", () => {
 
   const videoId = foundExisting ? id : getIdFromSharedUrl(url)
   LOOPER.reset()
-  player.cueVideoById(videoId, 0)
+  PLAYER.cueVideoById(videoId, 0)
 })
 
 function exportData() {
@@ -302,7 +281,7 @@ async function importData() {
       localStorage.setItem(k, data[k])
     })
     console.log("Imported data from clipboard!")
-    refreshSavedLoops(player.getVideoData().video_id)
+    refreshSavedLoops(PLAYER.getVideoData().video_id)
   }
 }
 

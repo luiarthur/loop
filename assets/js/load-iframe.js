@@ -4,26 +4,29 @@
 
 console.log("Loaded load-iframe.js")
 
+// Globals.
+var PLAYER, LOOPER;
+
 // const videoID = "sK0J62VFC78" // Blue Serve -- Bill Evans
-const videoID = "JyjFCbB6qhA" // Dreamer -- Kiefer
-function videoURL(videoID) {
-  return `https://www.youtube.com/v/${videoID}?version=3`
-}
+const initialVideoID = "JyjFCbB6qhA" // Dreamer -- Kiefer
 
 // 2. This code loads the IFrame Player API code asynchronously.
-const tag = document.createElement('script');
-tag.src = "https://www.youtube.com/iframe_api";
-const firstScriptTag = document.getElementsByTagName('script')[0];
-firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+function loadYouTubeIFrame() {
+  const tag = document.createElement('script');
+  tag.src = "https://www.youtube.com/iframe_api";
+  const firstScriptTag = document.getElementsByTagName('script')[0];
+  firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+}
+
+loadYouTubeIFrame()
 
 // 3. This function creates an <iframe> (and YouTube player) after the API code
 // downloads.
-var player;
 function onYouTubeIframeAPIReady() {
-  player = new YT.Player('player', {
+  PLAYER = new YT.Player('yt-player', {
     height: '350',
     width: '100%',
-    videoId: videoID,
+    videoId: initialVideoID,
     playerVars: {
       playsinline: 1,
       autoplay: 0,
@@ -38,8 +41,17 @@ function onYouTubeIframeAPIReady() {
 
 // 4. The API will call this function when the video player is ready.
 function onPlayerReady(event) {
+  LOOPER = new Looper(PLAYER)
+
   event.target.playVideo()
-  refreshSavedLoops(player.getVideoData().video_id)
+  refreshSavedLoops(event.target.getVideoData().video_id)
+
+  // Check if current time is out of bounds.
+  setInterval(() => {
+    if (outOfBounds(LOOPER, PLAYER)) {
+      PLAYER.seekTo(LOOPER.startTime)
+    }
+  }, 200) // execute every 0.2 seconds.
 }
 
 function onPlayerStateChange(event) {
@@ -49,7 +61,7 @@ function onPlayerStateChange(event) {
   ])
 
   if (states.has(event.data)) {
-    refreshSavedLoops(player.getVideoData().video_id)
+    refreshSavedLoops(event.target.getVideoData().video_id)
     LOOPER.reset()
   }
 }
