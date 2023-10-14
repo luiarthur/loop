@@ -6,16 +6,12 @@
 
 console.log("Loaded ui.js")
 
-function div(x, a) {
-    return Math.floor(x / a)
-}
-
 function round2(x) {
   return Math.round((x + Number.EPSILON) * 100) / 100
 }
 
 function secondsToMinuteSeconds(seconds) {
-  const m = div(seconds, 60)
+  const m = Math.floor(seconds / 60)
   const s = Math.floor(seconds % 60)
   return `${m}:${s.toString().padStart(2, "0")}`
 }
@@ -88,35 +84,24 @@ function removeStore(videoId, name) {
   localStorage.setItem(videoId, JSON.stringify(info))
 }
 
-
-function setHTMLById(id, html) {
-  document.getElementById(id).innerHTML = html
-}
-
-function loopItemComponent(name, idx, text, listener) {
-  const button = document.createElement("button")
-  button.id = `button-${name}-${idx + 1}`
-  button.classList.add("p-2")
-  if (name == "play") {
-    button.classList.add("p-2", "flex-grow-1")
-  }
-  button.addEventListener("click", () => listener(button.id))
-  button.innerText = text
-  return button
-}
-
 function loopComponent(loop, idx) {
-  const div = document.createElement("div")
-  div.id = `div-saved-loop-${idx+1}`
+  const template = document.querySelector("#template-loop-item")
+  const div = template.content.cloneNode(true).querySelector("div")
+
+  div.id += idx + 1
   div.setAttribute("name", loop.name)
-  div.classList.add("d-flex")
+
   const start = secondsToMinuteSeconds(loop.start)
   const end = secondsToMinuteSeconds(loop.end)
   const timeRange = `${start} - ${end}`
-  
-  div.appendChild(loopItemComponent("play", idx, timeRange, playLoop))
-  div.appendChild(loopItemComponent("edit", idx, "Edit", editLoop))
-  div.appendChild(loopItemComponent("remove", idx, "Remove", removeLoop))
+
+  const btn = div.querySelectorAll("button")
+  btn.forEach(b => b.id += idx + 1)
+
+  btn[0].textContent = timeRange
+  btn[0].addEventListener("click", () => playLoop(btn[0].id))
+  btn[1].addEventListener("click", () => editLoop(btn[1].id))
+  btn[2].addEventListener("click", () => removeLoop(btn[2].id))
 
   return div
 }
@@ -124,7 +109,7 @@ function loopComponent(loop, idx) {
 function refreshSavedLoops(videoId) {
   // Clean loops first.
   const div = document.getElementById("div-saved-loops")
-  div.innerHTML = ""
+  div.textContent = ""
 
   if (localStorage.getItem(videoId) !== null) {
     const info = JSON.parse(localStorage.getItem(videoId))
