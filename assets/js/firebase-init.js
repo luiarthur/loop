@@ -2,6 +2,11 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js"
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-analytics.js"
 import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js"
+import {
+    GoogleAuthProvider,
+    getAuth,
+    signInWithPopup
+} from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js"
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -36,9 +41,29 @@ for (let i=0; i<2; i++) {
         { merge: true }
     )
 
-    await setDoc(
-        doc(db, `users/${user}/videoId/${videoId[i]}/loops/loop${i}`),
-        { start: 2+i, end: 10+i },
-        { merge: true }
-    )
+    for (let j=0; j < 3; j++) {
+        await setDoc(
+            doc(db, `users/${user}/videoId/${videoId[i]}/loops/loop${j}`),
+            { start: 2+j, end: 10+j },
+            { merge: true }
+        )
+    }
 }
+
+// Test auth
+const auth = getAuth(window.fbApp)
+async function handleGoogleAuth(event) {
+    const provider = new GoogleAuthProvider()
+    const cred = await signInWithPopup(auth, provider)
+    const uid = cred.user.uid
+    const today = new Date()
+
+    // Record last login date.
+    setDoc(
+        doc(db, `users/${uid}/history/lastLogin`),
+        {date: `${today}`}
+    )
+
+    return cred
+}
+addClickListener("btn-auth", handleGoogleAuth)
