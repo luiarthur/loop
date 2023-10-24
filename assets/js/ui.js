@@ -67,12 +67,14 @@ function getStore(videoId) {
   )
 }
 
+// deprecate
 function appendStore(videoId, newItem) {
   const info = getStore(videoId)
   info.loops.push(newItem)
   localStorage.setItem(videoId, JSON.stringify(info))
 }
 
+// deprecate
 function removeStore(videoId, name) {
   const info = getStore(videoId)
   info.loops.forEach((loop, idx) => {
@@ -134,6 +136,10 @@ function removeLoop(clickedId) {
 
     // 2. Remove the record from storage.
     const data = PLAYER.getVideoData()
+    
+    window.removeFromFirebase(data.video_id, name)
+
+    // deprecate
     removeStore(data.video_id, name)
   }
 }

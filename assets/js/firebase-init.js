@@ -1,7 +1,13 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js"
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-analytics.js"
-import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js"
+import {
+    getFirestore,
+    doc,
+    setDoc,
+    updateDoc,
+    deleteDoc
+} from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js"
 import {
     GoogleAuthProvider,
     getAuth,
@@ -34,36 +40,51 @@ const title = ["Dreamer - Kiefer", "Blue Serge - Bill Evans"]
 const user = "alui"
 
 // Insert data.
-for (let i=0; i<2; i++) {
-    await setDoc(
-        doc(db, `users/${user}/videoId/${videoId[i]}`),
-        { "title": title[i] },
-        { merge: true }
-    )
+// for (let i=0; i<2; i++) {
+    // await setDoc(
+        // doc(db, `users/${user}/videoId/${videoId[i]}`),
+        // { "title": title[i] },
+        // { merge: true }
+    // )
 
-    for (let j=0; j < 3; j++) {
-        await setDoc(
-            doc(db, `users/${user}/videoId/${videoId[i]}/loops/loop${j}`),
-            { start: 2+j, end: 10+j },
-            { merge: true }
-        )
-    }
-}
+    // for (let j=0; j < 3; j++) {
+        // await setDoc(
+            // doc(db, `users/${user}/videoId/${videoId[i]}/loops/loop${j}`),
+            // { start: 2+j, end: 10+j },
+            // { merge: true }
+        // )
+    // }
+// }
 
 // Test auth
 const auth = getAuth(window.fbApp)
 async function handleGoogleAuth(event) {
     const provider = new GoogleAuthProvider()
-    const cred = await signInWithPopup(auth, provider)
-    const uid = cred.user.uid
+    window.CRED = await signInWithPopup(auth, provider)
+    const uid = window.CRED.user.uid
     const today = new Date()
+    console.log(`Logged in as ${uid}`)
 
-    // Record last login date.
-    setDoc(
-        doc(db, `users/${uid}/history/lastLogin`),
-        {date: `${today}`}
-    )
+    window.appendFirebase = async function (videoId, newItem) {
+        await setDoc(
+            doc(db, `users/${uid}/videoId/${videoId}/loops/${newItem.name}`),
+            newItem,
+            {merge: true}
+        )
+    }
 
-    return cred
+    window.removeFromFirebase = async function (videoId, name) {
+        await deleteDoc(
+            doc(db, `users/${uid}/videoId/${videoId}/loop/${name}`)
+        )
+    }
+
+    // append instead of overwrite data.
+    // await setDoc(
+    //     doc(db, `users/${uid}/videoId/aaa`),
+    //     {date: `${today}`},
+    //     { merge: true }
+    // )
 }
 addClickListener("btn-auth", handleGoogleAuth)
+

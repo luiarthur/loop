@@ -29,16 +29,20 @@ class Looper {
     setTextById("btn-end-loop", `End`)
   }
 
-  save() {
+  async save() {
     const data = this.player.getVideoData()
     const date = new Date()
 
-    appendStore(data.video_id, {
+    const newItem = {
       created: date.toISOString(),
-      name: randomLetters(24),
       start: round2(this.startTime),
-      end: round2(this.endTime)
-    })
+      end: round2(this.endTime),
+    }
+    newItem.name = `${newItem.start}-${newItem.end}`
+    await window.appendFirebase(data.video_id, newItem)
+
+    // deprecate
+    appendStore(data.video_id, newItem)
 
     refreshSavedLoops(data.video_id)
   }
