@@ -73,6 +73,7 @@ async function handleGoogleAuth(event) {
         )
     }
 
+    // untested
     window.removeFromFirebase = async function (videoId, name) {
         await deleteDoc(
             doc(db, `users/${uid}/videoId/${videoId}/loop/${name}`)
