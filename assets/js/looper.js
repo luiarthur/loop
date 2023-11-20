@@ -1,19 +1,3 @@
-function randomInteger(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min
-}
-
-function randomUpperCase() {
-    return String.fromCharCode(randomInteger(65, 90))
-}
-
-function randomLetters(n) {
-    let letters = ""
-    for (let i=0; i < n; i++) {
-        letters += randomUpperCase()
-    }
-    return letters
-}
-
 class Looper {
   constructor(player) {
     this.startTime = 0
@@ -35,7 +19,7 @@ class Looper {
 
     appendStore(data.video_id, {
       created: date.toISOString(),
-      name: randomLetters(24),
+      name: data.video_id,
       start: round2(this.startTime),
       end: round2(this.endTime)
     })
