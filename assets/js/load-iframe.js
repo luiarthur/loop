@@ -46,11 +46,15 @@ function onPlayerReady(event) {
   event.target.playVideo()
   refreshSavedLoops(event.target.getVideoData().video_id)
 
-  // Check if current time is out of bounds.
   setInterval(() => {
+    // Check if current time is out of bounds.
     if (outOfBounds(LOOPER, PLAYER)) {
       PLAYER.seekTo(LOOPER.startTime)
     }
+
+    // Update current time.
+    const currentTime = document.querySelector("#current-time")
+    currentTime.textContent = secondsToMinuteSeconds(PLAYER.getCurrentTime())
   }, 200) // execute every 0.2 seconds.
 }
 

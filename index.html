@@ -25,9 +25,10 @@
           <datalist id="dl-video-names"></datalist>
 
           <button id="btn-load-yt-url">Load</button>
+          <small id="current-time"></small>
           <br><br>
 
-          <div class="d-flex">
+          <div class="d-flex loop-controls">
             <button class="p-2 flex-fill" id="btn-start-loop">Start</button>
             <button class="p-2 flex-fill" id="btn-end-loop">End</button>
             <button class="p-2 flex-fill" id="btn-restart-loop">Restart</button>
@@ -59,7 +60,7 @@
     </div>
 
     <template id="template-loop-item">
-      <div id="div-saved-loop-" class="d-flex">
+      <div id="div-saved-loop-" class="loop-controls d-flex">
         <button id="button-play-" class="p-2 flex-grow-1"></button>
         <button id="button-edit-" class="p-2">Edit</button>
         <button id="button-remove-" class="p-2">Remove</button>

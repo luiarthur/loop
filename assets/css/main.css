@@ -1,14 +1,20 @@
 /* Bootstrap */
 @import url("https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.3/css/bootstrap.min.css");
 
-/* Font awesome, for glyphs */
-@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css");
-
-.btn-small {
-  border: 0;
+body {
+  background-color: black;
+  color: white;
 }
 
-a:link { text-decoration: none; }
-a:visited { text-decoration: none; }
-a:hover { text-decoration: none; }
-a:active { text-decoration: none; }
+button {
+  margin: 0.1em;
+  border-width: 0;
+}
+button:hover {
+  background-color: cornflowerblue;
+  transition: 0.3s;
+}
+button:active {
+  background-color: blue;
+  transition: 1s;
+}
