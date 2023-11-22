@@ -24,21 +24,26 @@ function clearStorage() {
 }
 
 function populateVideos() {
-  const datalist = document.getElementById("dl-video-names")
+  const selection = document.getElementById("select-video-names")
   const videoIds = Object.keys(localStorage)
   for (id of videoIds) {
-    const info = JSON.parse(localStorage.getItem(id))
-    const option = document.createElement("option")
-    option.setAttribute("id", id)
-    console.log(info)
-    option.value = info.title
-    console.log(option)
-    option.addEventListener("click", () => {
-      LOOPER.reset()
-      PLAYER.cueVideoById(id, 0)
-    })
-    datalist.appendChild(option)
+    if (id != "asd") {
+      const info = JSON.parse(localStorage.getItem(id))
+      const option = document.createElement("option")
+      option.setAttribute("video-id", id)
+      option.value = info.title
+      option.textContent = option.value
+      selection.appendChild(option)
+    }
   }
+
+  selection.addEventListener("change", () => {
+    const selectedItem = selection.options.item(selection.selectedIndex)
+    const videoId = selectedItem.getAttribute("video-id")
+    console.log(`Loading ${videoId}...`)
+    LOOPER.reset()
+    PLAYER.cueVideoById(videoId, 0)
+  })
 }
 
 // Create localStorage if needed.
@@ -224,19 +229,20 @@ addClickListener("btn-load-yt-url", () => {
   let url = document.getElementById("input-yt-url").value
 
   // If the title is provided in the URL box, find the appropriate id.
-  let foundExisting = false
-  const videoIds = Object.keys(localStorage)
-  let id = null
-  for (vid of videoIds) {
-    const info = JSON.parse(localStorage.getItem(vid))
-    if (url == info.title) {
-      foundExisting = true
-      id = info.videoId
-      break
-    }
-  }
+  // let foundExisting = false
+  // const videoIds = Object.keys(localStorage)
+  // let id = null
+  // for (vid of videoIds) {
+  //   const info = JSON.parse(localStorage.getItem(vid))
+  //   if (url == info.title) {
+  //     foundExisting = true
+  //     id = info.videoId
+  //     break
+  //   }
+  // }
 
-  const videoId = foundExisting ? id : getIdFromSharedUrl(url)
+  // const videoId = foundExisting ? id : getIdFromSharedUrl(url)
+  const videoId = getIdFromSharedUrl(url)
   LOOPER.reset()
   PLAYER.cueVideoById(videoId, 0)
 })

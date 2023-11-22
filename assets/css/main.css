@@ -2,8 +2,9 @@
 @import url("https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.3/css/bootstrap.min.css");
 
 body {
-  background-color: black;
-  color: white;
+  background-color: #222222;
+  color: #eeeeee;
+  font-family: monospace;
 }
 
 button {
@@ -17,4 +18,7 @@ button:hover {
 button:active {
   background-color: blue;
   transition: 1s;
+}
+.yt-input-section {
+  margin: 0.1em;
 }

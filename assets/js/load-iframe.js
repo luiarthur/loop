@@ -7,6 +7,7 @@ console.log("Loaded load-iframe.js")
 // Globals.
 var PLAYER, LOOPER;
 
+// TODO: set initialVideoID to be the last viewed video id.
 // const videoID = "sK0J62VFC78" // Blue Serve -- Bill Evans
 const initialVideoID = "JyjFCbB6qhA" // Dreamer -- Kiefer
 

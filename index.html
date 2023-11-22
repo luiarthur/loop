@@ -19,15 +19,20 @@
             <div id="yt-player"></div>
           </div>
 
-          <label>YT Short URL:
-            <input id="input-yt-url" list="dl-video-names"/>
-          </label>
-          <datalist id="dl-video-names"></datalist>
+          <div id="div-yt-url">
+            <div id="div-yt-url-input" class="yt-input-section">
+              <input id="input-yt-url" placeholder="Enter YT Short URL">
+              <button id="btn-load-yt-url">Load</button>
+            </div>
 
-          <button id="btn-load-yt-url">Load</button>
-          <small id="current-time"></small>
-          <br><br>
+            <div id="div-yt-select-video" class="yt-input-section">
+              <select id="select-video-names">
+                <option disabled selected value>-- select saved video --</option>
+              </select>
+            </div>
+          </div>
 
+          <code id="current-time"></code>
           <div class="d-flex loop-controls">
             <button class="p-2 flex-fill" id="btn-start-loop">Start</button>
             <button class="p-2 flex-fill" id="btn-end-loop">End</button>
