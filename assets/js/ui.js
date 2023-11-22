@@ -277,9 +277,24 @@ async function importData() {
   }
 }
 
+// TODO: Add this to UI
+async function removeCurrentVideo(event) {
+  if (event.detail === 3) {
+    const selection = document.getElementById("select-video-names")
+    const selectedItem = selection.options.item(selection.selectedIndex)
+    const title = selectedItem.value
+    const videoId = selectedItem.getAttribute("video-id")
+    if (confirm(`Delete data for ${title}?`)) {
+      localStorage.removeItem(videoId)
+      alert(`Removed ${title}!`)
+    }
+  }
+}
+
 addClickListener("app-name", clearStorage)
 addClickListener("btn-restart-loop", restartLoop)
 addClickListener("btn-save-loop", () => LOOPER.save())
 addClickListener("btn-clear-loop", () => LOOPER.reset())
 addClickListener("btn-export-data", exportData)
 addClickListener("btn-import-data", importData)
+addEventListener("click", removeCurrentVideo)
