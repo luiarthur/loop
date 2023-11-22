@@ -2,6 +2,7 @@
 - [X] Remove setTimeout
 - [ ] The name of the loops should just be the start and end times.
       Because that is unique.
+- [ ] Add option to remove saved videos.
 */
 
 console.log("Loaded ui.js")
