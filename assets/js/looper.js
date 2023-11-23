@@ -17,12 +17,13 @@ class Looper {
     const data = this.player.getVideoData()
     const date = new Date()
 
-    appendStore(data.video_id, {
+    const newItem = {
       created: date.toISOString(),
-      name: data.video_id,
       start: round2(this.startTime),
       end: round2(this.endTime)
-    })
+    }
+    newItem.name = `${newItem.start}-${newItem.end}`
+    appendStore(data.video_id, newItem)
 
     refreshSavedLoops(data.video_id)
   }
