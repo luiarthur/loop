@@ -5,8 +5,6 @@
 - [ ] Add option to remove saved videos.
 */
 
-console.log("Loaded ui.js")
-
 function round2(x) {
   return Math.round((x + Number.EPSILON) * 100) / 100
 }
@@ -54,9 +52,11 @@ function populateVideos() {
   })
 }
 
-// Create localStorage if needed.
-if (localStorage !== null) {
-  populateVideos()
+function initStorage() {
+  // Create localStorage if needed.
+  if (localStorage !== null) {
+    populateVideos()
+  }
 }
 
 function getOr(obj, key, defaultValue) {
@@ -176,6 +176,7 @@ function playLoop(clickedId) {
 
 function editLoop(clickedId) {
   // TODO
+  alert("'Edit' is not implemented")
   console.log(`Clicked ${clickedId}`)
 }
 
@@ -192,38 +193,9 @@ function restartLoop() {
   PLAYER.seekTo(LOOPER.startTime)
 }
 
-// Show the list of tracks saved for current video.
-const saved_loops = document.getElementById("ul-saved-loops")
-
 function addClickListener(id, f) {
   document.getElementById(id).addEventListener("click", f)
 }
-
-// Event Listeners.
-addClickListener("btn-start-loop", () => {
-  LOOPER.startTime = PLAYER.getCurrentTime()
-  if (LOOPER.endTime === Infinity) {
-    LOOPER.endTime = PLAYER.getDuration()
-  }
-
-  if(LOOPER.startTime < LOOPER.endTime) {
-    const start = secondsToMinuteSeconds(LOOPER.startTime)
-    setTextById("btn-start-loop", `Start (${start})`)
-  } else {
-    setTextById("btn-end-loop", `End`)
-  }
-})
-
-addClickListener("btn-end-loop", () => {
-  LOOPER.endTime = PLAYER.getCurrentTime()
-  if(LOOPER.startTime < LOOPER.endTime) {
-    const end = secondsToMinuteSeconds(LOOPER.endTime)
-    setTextById("btn-end-loop", `End (${end})`)
-  } else {
-    LOOPER.startTime = 0
-    setTextById("btn-start-loop", `Start`)
-  }
-})
 
 function getIdFromSharedUrl(url) {
   const re = /youtu.be\/(\w+)/
@@ -232,28 +204,6 @@ function getIdFromSharedUrl(url) {
   return id
 }
 
-
-addClickListener("btn-load-yt-url", () => {
-  let url = document.getElementById("input-yt-url").value
-
-  // If the title is provided in the URL box, find the appropriate id.
-  // let foundExisting = false
-  // const videoIds = Object.keys(localStorage)
-  // let id = null
-  // for (vid of videoIds) {
-  //   const info = JSON.parse(localStorage.getItem(vid))
-  //   if (url == info.title) {
-  //     foundExisting = true
-  //     id = info.videoId
-  //     break
-  //   }
-  // }
-
-  // const videoId = foundExisting ? id : getIdFromSharedUrl(url)
-  const videoId = getIdFromSharedUrl(url)
-  LOOPER.reset()
-  PLAYER.cueVideoById(videoId, 0)
-})
 
 function exportData() {
   // Copy localStorage to clipboard.
@@ -296,20 +246,66 @@ function removeCurrentVideo() {
   }
 }
 
-document.querySelectorAll(".input-yt").forEach(input => {
-  input.addEventListener("change", event => {
-    document.querySelectorAll(".yt-input-section").forEach(input_ => {
-      input_.classList.add("hidden")
-    })
-    const target = document.getElementById(input.id.replace("radio", "div"))
-    target.classList.remove("hidden")
-  })
-});
+function run() {
+  console.log("Loaded ui.js")
+  
+  // Set up storage for the first time, if needed.
+  initStorage()
 
-addClickListener("btn-restart-loop", restartLoop)
-addClickListener("btn-save-loop", () => LOOPER.save())
-addClickListener("btn-clear-loop", () => LOOPER.reset())
-addClickListener("btn-export-data", exportData)
-addClickListener("btn-import-data", importData)
-addClickListener("btn-clear-cache", clearStorage)
-addClickListener("btn-remove-video", removeCurrentVideo)
+  // Show the list of tracks saved for current video.
+  const saved_loops = document.getElementById("ul-saved-loops")
+
+  // Event Listeners.
+  addClickListener("btn-start-loop", () => {
+    LOOPER.startTime = PLAYER.getCurrentTime()
+    if (LOOPER.endTime === Infinity) {
+      LOOPER.endTime = PLAYER.getDuration()
+    }
+
+    if(LOOPER.startTime < LOOPER.endTime) {
+      const start = secondsToMinuteSeconds(LOOPER.startTime)
+      setTextById("btn-start-loop", `Start (${start})`)
+    } else {
+      setTextById("btn-end-loop", `End`)
+    }
+  })
+
+  addClickListener("btn-end-loop", () => {
+    LOOPER.endTime = PLAYER.getCurrentTime()
+    if(LOOPER.startTime < LOOPER.endTime) {
+      const end = secondsToMinuteSeconds(LOOPER.endTime)
+      setTextById("btn-end-loop", `End (${end})`)
+    } else {
+      LOOPER.startTime = 0
+      setTextById("btn-start-loop", `Start`)
+    }
+  })
+
+  addClickListener("btn-load-yt-url", () => {
+    let url = document.getElementById("input-yt-url").value
+    const videoId = getIdFromSharedUrl(url)
+    LOOPER.reset()
+    PLAYER.cueVideoById(videoId, 0)
+  })
+
+  document.querySelectorAll(".input-yt").forEach(input => {
+    input.addEventListener("change", event => {
+      document.querySelectorAll(".yt-input-section").forEach(input_ => {
+        input_.classList.add("hidden")
+      })
+      const target = document.getElementById(input.id.replace("radio", "div"))
+      target.classList.remove("hidden")
+    })
+  })
+
+  addClickListener("btn-restart-loop", restartLoop)
+  addClickListener("btn-save-loop", () => LOOPER.save())
+  addClickListener("btn-clear-loop", () => LOOPER.reset())
+  addClickListener("btn-export-data", exportData)
+  addClickListener("btn-import-data", importData)
+  addClickListener("btn-clear-cache", clearStorage)
+  addClickListener("btn-remove-video", removeCurrentVideo)
+
+}
+
+run()
