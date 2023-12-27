@@ -67,6 +67,7 @@ function onPlayerStateChange(event) {
 
   if (states.has(event.data)) {
     refreshSavedLoops(event.target.getVideoData().video_id)
+    populateVideos()
     LOOPER.reset()
   }
 }

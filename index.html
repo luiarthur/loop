@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="./assets/css/main.css">
   </head>
   <body>
-    <div class="container">
+    <div class="container" id="app">
       <div class="row">
         <div class="col-lg-8 offset-lg-2 col-md-10 offset-md-1">
           <h1 id="app-name">
@@ -19,17 +19,21 @@
             <div id="yt-player"></div>
           </div>
 
+          <form id="form-input-radio">
+            <input id="radio-yt-url-input" type="radio" class="input-yt" name="optradio" checked>Load YT by URL
+            <input id="radio-yt-select-video" type="radio" class="input-yt" name="optradio">Load saved video
+          </form>
+
           <div id="div-yt-url-input" class="yt-input-section">
             <input id="input-yt-url" placeholder="Enter YT Short URL">
             <button id="btn-load-yt-url">Load</button>
           </div>
 
-          <div id="div-yt-select-video" class="yt-input-section">
-            <select id="select-video-names" class="form-control">
-              <option disabled selected value>-- select saved video --</option>
-            </select>
+          <div id="div-yt-select-video" class="yt-input-section hidden">
+            <select id="select-video-names" class="form-control"></select>
           </div>
 
+          <br/>
           <code id="current-time"></code>
           <div class="d-flex loop-controls">
             <button class="p-2 flex-fill" id="btn-start-loop">Start</button>
@@ -41,13 +45,17 @@
 
           <div id="div-saved-loops"></div>
 
-          <div class="d-flex">
-            <button class="p-2 flex-fill" id="btn-import-data">
-              Import
+          <br/>
+          <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Settings
             </button>
-            <button class="p-2 flex-fill" id="btn-export-data">
-              Export
-            </button>
+            <ul class="dropdown-menu">
+              <li id="btn-import-data"><a class="dropdown-item" href="#">Import Data</a></li>
+              <li id="btn-export-data"><a class="dropdown-item" href="#">Export Data</a></li>
+              <li id="btn-remove-video"><a class="dropdown-item" href="#">Remove Video</a></li>
+              <li id="btn-clear-cache"><a class="dropdown-item" href="#">Delete All Data</a></li>
+            </ul>
           </div>
 
           <!--
@@ -70,6 +78,9 @@
       </div>
     </template>
   </body>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.9.2/umd/popper.min.js" integrity="sha512-2rNj2KJ+D8s1ceNasTIex6z4HWyOnEYLVC3FigGOmyQCZc2eBXKgOxQmo3oKLHyfcj53uz4QMsRCWNbLd32Q1g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script src="./assets/js/looper.js"></script>
   <script src="./assets/js/load-iframe.js"></script>
   <script src="./assets/js/ui.js"></script>

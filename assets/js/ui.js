@@ -17,15 +17,22 @@ function secondsToMinuteSeconds(seconds) {
   return `${m}:${s.toString().padStart(2, "0")}`
 }
 
+function render() {
+    refreshSavedLoops(PLAYER.getVideoData().video_id)
+    populateVideos()
+}
+
 function clearStorage() {
   if (confirm("Delete saved data?")) {
     localStorage.clear()
-    refreshSavedLoops(PLAYER.getVideoData().video_id)
+    render()
   }
 }
 
 function populateVideos() {
   const selection = document.getElementById("select-video-names")
+  selection.innerHTML = "<option disabled selected value>-- select saved video --</option>"
+
   const videoIds = Object.keys(localStorage)
   for (id of videoIds) {
     if (id != "asd") {
@@ -273,28 +280,36 @@ async function importData() {
       localStorage.setItem(k, data[k])
     })
     console.log("Imported data from clipboard!")
-    refreshSavedLoops(PLAYER.getVideoData().video_id)
+    render()
   }
 }
 
-// TODO: Add this to UI
-async function removeCurrentVideo(event) {
-  if (event.detail === 3) {
-    const selection = document.getElementById("select-video-names")
-    const selectedItem = selection.options.item(selection.selectedIndex)
-    const title = selectedItem.value
-    const videoId = selectedItem.getAttribute("video-id")
-    if (confirm(`Delete data for ${title}?`)) {
-      localStorage.removeItem(videoId)
-      alert(`Removed ${title}!`)
-    }
+function removeCurrentVideo() {
+  const selection = document.getElementById("select-video-names")
+  const selectedItem = selection.options.item(selection.selectedIndex)
+  const title = selectedItem.value
+  const videoId = selectedItem.getAttribute("video-id")
+  if (confirm(`Delete data for ${title}?`)) {
+    localStorage.removeItem(videoId)
+    alert(`Removed ${title}!`)
+    render()
   }
 }
 
-addClickListener("app-name", clearStorage)
+document.querySelectorAll(".input-yt").forEach(input => {
+  input.addEventListener("change", event => {
+    document.querySelectorAll(".yt-input-section").forEach(input_ => {
+      input_.classList.add("hidden")
+    })
+    const target = document.getElementById(input.id.replace("radio", "div"))
+    target.classList.remove("hidden")
+  })
+});
+
 addClickListener("btn-restart-loop", restartLoop)
 addClickListener("btn-save-loop", () => LOOPER.save())
 addClickListener("btn-clear-loop", () => LOOPER.reset())
 addClickListener("btn-export-data", exportData)
 addClickListener("btn-import-data", importData)
-addEventListener("click", removeCurrentVideo)
+addClickListener("btn-clear-cache", clearStorage)
+addClickListener("btn-remove-video", removeCurrentVideo)

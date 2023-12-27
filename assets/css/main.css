@@ -22,3 +22,9 @@ button:active {
 .yt-input-section {
   margin: 0.1em;
 }
+.hidden {
+  display: none;
+}
+#app {
+  padding-bottom: 2em;
+}
