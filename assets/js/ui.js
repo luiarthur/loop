@@ -235,10 +235,9 @@ async function importData() {
 }
 
 function removeCurrentVideo() {
-  const selection = document.getElementById("select-video-names")
-  const selectedItem = selection.options.item(selection.selectedIndex)
-  const title = selectedItem.value
-  const videoId = selectedItem.getAttribute("video-id")
+  const info = PLAYER.getVideoData()
+  const videoId = info.video_id
+  const title = info.title
   if (confirm(`Delete data for ${title}?`)) {
     localStorage.removeItem(videoId)
     alert(`Removed ${title}!`)
