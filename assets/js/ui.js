@@ -81,20 +81,22 @@ function getStore(videoId) {
 }
 
 function appendStore(videoId, newItem) {
-  const info = getStore(videoId)
-  info.loops.push(newItem)
-  localStorage.setItem(videoId, JSON.stringify(info))
+  // const info = getStore(videoId)
+  // info.loops.push(newItem)
+  // localStorage.setItem(videoId, JSON.stringify(info))
+  window.appendFirebase(videoId, newItem)
 }
 
 function removeStore(videoId, name) {
-  const info = getStore(videoId)
-  info.loops.forEach((loop, idx) => {
-    if (loop.name == name) {
-      info.loops.splice(idx, 1)
-    }
-  })
+  window.removeLoopFromFirebase(videoId, name)
+  // const info = getStore(videoId)
+  // info.loops.forEach((loop, idx) => {
+  //   if (loop.name == name) {
+  //     info.loops.splice(idx, 1)
+  //   }
+  // })
 
-  localStorage.setItem(videoId, JSON.stringify(info))
+  // localStorage.setItem(videoId, JSON.stringify(info))
 }
 
 function loopComponent(loop, idx) {
@@ -119,19 +121,17 @@ function loopComponent(loop, idx) {
   return div
 }
 
-function refreshSavedLoops(videoId) {
+async function refreshSavedLoops(videoId) {
   // Clean loops first.
   const div = document.getElementById("div-saved-loops")
   div.textContent = ""
 
-  if (localStorage.getItem(videoId) !== null) {
-    const info = JSON.parse(localStorage.getItem(videoId))
-    const savedLoops = info.loops
-
-    savedLoops.forEach((loop, idx) => {
-      div.appendChild(loopComponent(loop, idx))
-    })
-  }
+  const savedLoops = await window.getLoopsFromFirebase(videoId)
+  console.log(savedLoops)
+  savedLoops.forEach((loop, idx) => {
+    console.log(loop)
+    div.appendChild(loopComponent(loop, idx))
+  })
 }
 
 function removeLoop(clickedId) {
