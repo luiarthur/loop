@@ -305,7 +305,6 @@ function run() {
   addClickListener("btn-import-data", importData)
   addClickListener("btn-clear-cache", clearStorage)
   addClickListener("btn-remove-video", removeCurrentVideo)
-
 }
 
 run()
