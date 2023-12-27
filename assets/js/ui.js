@@ -240,7 +240,6 @@ function removeCurrentVideo() {
   const title = info.title
   if (confirm(`Delete data for ${title}?`)) {
     localStorage.removeItem(videoId)
-    alert(`Removed ${title}!`)
     render()
   }
 }
