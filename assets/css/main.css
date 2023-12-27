@@ -28,3 +28,6 @@ button:active {
 #app {
   padding-bottom: 2em;
 }
+.center {
+  text-align: center;
+}
