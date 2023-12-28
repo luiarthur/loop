@@ -7,6 +7,7 @@ import {
     getDocs,
     setDoc,
     updateDoc,
+    deleteField,
     collection,
     collectionGroup,
     deleteDoc,
@@ -69,93 +70,65 @@ async function handleGoogleAuth(event) {
     const uid = credentials.user.uid
     console.log(`Logged in as ${uid}`)
 
-    // Repopulate previously saved videos.
-    async function loadVideos() {
-        const ref = await collection(db, "users", uid, "videoId")
-        onSnapshot(ref, snapshot => {
-            const selection = document.getElementById("select-video-names")
-            selection.innerHTML = "<option disabled selected value>-- select saved video --</option>"
+    window.render = () => {
+        const data = window.doc_data
 
-            snapshot.forEach(doc => {
-                console.log("data.id: " + doc.id)
-                let data = doc.data()
-                const option = document.createElement("option")
-                option.setAttribute("video-id", doc.id)
-                option.value = data.title
-                option.textContent = option.value
-                selection.appendChild(option)
-            })
-
-            selection.addEventListener("change", () => {
-                const selectedItem = selection.options.item(selection.selectedIndex)
-                const videoId = selectedItem.getAttribute("video-id")
-                console.log(`Loading ${videoId}...`)
-                window.LOOPER.reset()
-                window.PLAYER.cueVideoById(videoId, 0)
-            })
-        })
-    }
-
-    // Listen to changes videoId collection. Update UI accordingly.
-    window.listenDoc = async (videoId) => {
-        const docs = collection(db, "users", uid, "videoId", videoId, "loops")
-
-        // Attempt to stop listening to any changes to documents in the
-        // videoId's collection.
-        try {
-            console.log("Unsubscribed to old changes.")
-            window.unsubscribe()
-        } catch {
-            console.log("No active listeners to unsubscribe.")
-        }
-
-        window.unsubscribe = onSnapshot(docs, (snapshot) => {
-            console.log("Reload loops.")
-
+        // Repopulate current loops.
+        function repopulateLoops(videoId) {
             const div = document.getElementById("div-saved-loops")
             div.textContent = ""
 
-            snapshot.forEach(doc => {
-              let data = doc.data()
-              div.appendChild(window.loopComponent(data))
+            Object.values(data).forEach(item => {
+                if (item.videoId == videoId) {
+                    div.appendChild(window.loopComponent(item))
+                }
             })
+        }
+        repopulateLoops(window.PLAYER.getVideoData().video_id)
+
+        // Repopulate previous videos.
+        const selection = document.getElementById("select-video-names")
+        selection.innerHTML = "<option disabled selected value>-- select saved video --</option>"
+
+        // Store unique video ids and titles in an Object.
+        const title = {}
+        Object.values(data).forEach(item => {
+            title[item.videoId] = item.title
+        })
+
+        Object.keys(title).forEach(id => {
+            const option = document.createElement("option")
+            option.setAttribute("video-id", id)
+            option.value = title[id]
+            option.textContent = option.value
+            selection.appendChild(option)
+        })
+
+        selection.addEventListener("change", () => {
+            const selectedItem = selection.options.item(selection.selectedIndex)
+            const videoId = selectedItem.getAttribute("video-id")
+            window.LOOPER.reset()
+            window.PLAYER.cueVideoById(videoId, 0)
+            repopulateLoops(videoId)
         })
     }
 
+    // Listen for changes in Firestore.
+    window.unsubscribe = onSnapshot(doc(db, "users", uid), (doc) => {
+        window.doc_data = doc.data()
+        render()
+    })
+
     // Append a single loop.
-    window.appendFirebase = async (videoId, newItem) => {
-        const ref = doc(
-            db, "users", uid, "videoId", videoId, "loops", newItem.name
-        )
-        await setDoc(ref, newItem, {merge: true})
-
-        const now = new Date()
-        await setDoc(
-            doc(db, "users", uid, "videoId", videoId),
-            {
-                lastUpdated: now.toISOString(),
-                title: PLAYER.getVideoData().title
-            },
-            {merge: true}
-        )
+    window.appendFirebase = async (newItem) => {
+        const ref = doc(db, "users", uid)
+        await setDoc(ref, newItem, { merge: true })
     }
 
-    // FIXME: Not removing from firebase?!
     // Remove a single loop.
-    window.removeLoopFromFirebase = async (videoId, name) => {
-        await deleteDoc(
-            doc(db, "users", uid, "videoId", videoId, "loops", name)
-        )
+    window.removeLoopFromFirebase = async (key) => {
+        await updateDoc(doc(db, "users", uid), {[key]: deleteField()})
     }
 
-    // untested. I think removing collection is not permitted in firestore.
-    window.removeVideoFromFirebase = async function (videoId) {
-        await deleteDoc(
-            doc(db, `users/${uid}/videoId/${videoId}`)
-        )
-    }
-
-    await window.listenDoc(PLAYER.getVideoData().video_id)
-    await loadVideos()
 }
 document.getElementById("btn-auth").addEventListener("click", handleGoogleAuth)

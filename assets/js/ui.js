@@ -22,30 +22,6 @@ function clearStorage() {
   }
 }
 
-function populateVideos() {
-  const selection = document.getElementById("select-video-names")
-  selection.innerHTML = "<option disabled selected value>-- select saved video --</option>"
-
-  const videoIds = Object.keys(localStorage)
-  for (id of videoIds) {
-    if (id != "asd") {
-      const info = JSON.parse(localStorage.getItem(id))
-      const option = document.createElement("option")
-      option.setAttribute("video-id", id)
-      option.value = info.title
-      option.textContent = option.value
-      selection.appendChild(option)
-    }
-  }
-
-  selection.addEventListener("change", () => {
-    const selectedItem = selection.options.item(selection.selectedIndex)
-    const videoId = selectedItem.getAttribute("video-id")
-    console.log(`Loading ${videoId}...`)
-    LOOPER.reset()
-    PLAYER.cueVideoById(videoId, 0)
-  })
-}
 
 function getOr(obj, key, defaultValue) {
   if (!obj.hasOwnProperty(key)) {
@@ -68,29 +44,30 @@ function getStore(videoId) {
   )
 }
 
-function appendStore(videoId, newItem) {
-  console.log(`Adding loop: ${newItem.name} to ${videoId}`)
-  window.appendFirebase(videoId, newItem)
+function appendStore(newItem) {
+  console.log(`Adding loop: ${JSON.stringify(newItem)}`)
+  window.appendFirebase(newItem)
 }
 
-function removeStore(videoId, name) {
-  console.log(`Removing loop: ${name} from ${videoId}`)
-  window.removeLoopFromFirebase(videoId, name)
+function removeStore(name) {
+  console.log(`Removing loop: ${name}`)
+  window.removeLoopFromFirebase(name)
 }
 
 window.loopComponent = (loop) => {
   const template = document.querySelector("#template-loop-item")
   const div = template.content.cloneNode(true).querySelector("div")
 
-  div.id += loop.name
-  div.setAttribute("name", loop.name)
+  const uname = `${loop.videoId}_${loop.start}_${loop.end}`
+  div.id += uname
+  div.setAttribute("name", uname)
 
   const start = secondsToMinuteSeconds(loop.start)
   const end = secondsToMinuteSeconds(loop.end)
   const timeRange = `${start} - ${end}`
 
   const btn = div.querySelectorAll("button")
-  btn.forEach(b => b.id += loop.name)
+  btn.forEach(b => b.id += uname)
 
   btn[0].textContent = timeRange
   btn[0].addEventListener("click", () => playLoop(btn[0].id))
@@ -102,31 +79,24 @@ window.loopComponent = (loop) => {
 
 function removeLoop(clickedId) {
   if (confirm("Delete loop?")) {
-    // 1. Remove the list item from page.
+    // 1. Remove the record from storage.
     const id = clickedId.split("_").pop()
-    const div_id = `div-saved-loop_${id}`
-    const elem = document.getElementById(div_id)
-    elem.remove()
-    console.log(`Clicked ${clickedId}`)
+    console.log(`Clicked: ${clickedId}`)
 
-    // 2. Remove the record from storage.
-    const data = PLAYER.getVideoData()
-    removeStore(data.video_id, id)
+    // This also updates the page.
+    removeStore(id)
   }
 }
 
 function playLoop(clickedId) {
-  const videoId = PLAYER.getVideoData().video_id
-  const info = getStore(videoId)
-
-  const id = clickedId.split("_").pop()
-  const div_id = `div-saved-loop_${id}`
+  const id = clickedId.split("-").pop()
+  const div_id = `div_saved_loop-${id}`
   const elem = document.getElementById(div_id)
   console.log(elem)
 
-  const times = id.split("-")
-  LOOPER.startTime = +times[0]
-  LOOPER.endTime = +times[1]
+  const [_, startTime, endTime] = id.split("_")
+  LOOPER.startTime = +startTime
+  LOOPER.endTime = +endTime
   PLAYER.seekTo(LOOPER.startTime)
 
   console.log(`Clicked ${clickedId}`)
@@ -162,21 +132,13 @@ function getIdFromSharedUrl(url) {
   return id
 }
 
-function removeCurrentVideo() {
-  const info = PLAYER.getVideoData()
-  const videoId = info.video_id
-  const title = info.title
-  if (confirm(`Delete data for ${title}?`)) {
-    localStorage.removeItem(videoId)
-  }
-}
-
 async function loadVideoByUrl() {
   let url = document.getElementById("input-yt-url").value
   const videoId = getIdFromSharedUrl(url)
   LOOPER.reset()
-  PLAYER.cueVideoById(videoId, 0)
-  window.listenDoc(videoId)
+  await PLAYER.cueVideoById(videoId, 0)
+  console.log("load:" + PLAYER.getVideoData().video_id)
+  window.render()
 }
 
 function run() {
@@ -227,7 +189,6 @@ function run() {
   addClickListener("btn-save-loop", () => LOOPER.save())
   addClickListener("btn-clear-loop", () => LOOPER.reset())
   addClickListener("btn-clear-cache", clearStorage)
-  addClickListener("btn-remove-video", removeCurrentVideo)
 }
 
 run()

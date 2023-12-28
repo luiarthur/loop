@@ -20,9 +20,13 @@ class Looper {
     const newItem = {
       created: date.toISOString(),
       start: round2(this.startTime),
-      end: round2(this.endTime)
+      end: round2(this.endTime),
+      videoId: data.video_id,
+      title: data.title
     }
-    newItem.name = `${newItem.start}-${newItem.end}`
-    appendStore(data.video_id, newItem)
+    // Unique name.
+    let uname = `${newItem.videoId}_${loop.created}`
+    uname = uname.replace(":", "").replace("-", "")
+    appendStore({[uname]: newItem})
   }
 }
