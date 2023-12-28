@@ -79,9 +79,10 @@ async function handleGoogleAuth(event) {
 
             snapshot.forEach(doc => {
               let data = doc.data()
+              console.log("data.id: " + data.id)
               const option = document.createElement("option")
               option.setAttribute("video-id", doc.id)
-              option.value = info.title
+              option.value = data.title
               option.textContent = option.value
               selection.appendChild(option)
             })
