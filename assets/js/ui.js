@@ -15,15 +15,10 @@ function secondsToMinuteSeconds(seconds) {
   return `${m}:${s.toString().padStart(2, "0")}`
 }
 
-function render() {
-    refreshSavedLoops(PLAYER.getVideoData().video_id)
-    populateVideos()
-}
-
+// TODO
 function clearStorage() {
   if (confirm("Delete saved data?")) {
-    localStorage.clear()
-    render()
+    alert("clearStorage() is not implemented!")
   }
 }
 
@@ -52,13 +47,6 @@ function populateVideos() {
   })
 }
 
-function initStorage() {
-  // Create localStorage if needed.
-  if (localStorage !== null) {
-    populateVideos()
-  }
-}
-
 function getOr(obj, key, defaultValue) {
   if (!obj.hasOwnProperty(key)) {
     obj.setItem(key, defaultValue)
@@ -81,29 +69,20 @@ function getStore(videoId) {
 }
 
 function appendStore(videoId, newItem) {
-  // const info = getStore(videoId)
-  // info.loops.push(newItem)
-  // localStorage.setItem(videoId, JSON.stringify(info))
+  console.log(`Adding loop: ${newItem.name} to ${videoId}`)
   window.appendFirebase(videoId, newItem)
 }
 
 function removeStore(videoId, name) {
+  console.log(`Removing loop: ${name} from ${videoId}`)
   window.removeLoopFromFirebase(videoId, name)
-  // const info = getStore(videoId)
-  // info.loops.forEach((loop, idx) => {
-  //   if (loop.name == name) {
-  //     info.loops.splice(idx, 1)
-  //   }
-  // })
-
-  // localStorage.setItem(videoId, JSON.stringify(info))
 }
 
-function loopComponent(loop, idx) {
+window.loopComponent = (loop) => {
   const template = document.querySelector("#template-loop-item")
   const div = template.content.cloneNode(true).querySelector("div")
 
-  div.id += idx + 1
+  div.id += loop.name
   div.setAttribute("name", loop.name)
 
   const start = secondsToMinuteSeconds(loop.start)
@@ -111,7 +90,7 @@ function loopComponent(loop, idx) {
   const timeRange = `${start} - ${end}`
 
   const btn = div.querySelectorAll("button")
-  btn.forEach(b => b.id += idx + 1)
+  btn.forEach(b => b.id += loop.name)
 
   btn[0].textContent = timeRange
   btn[0].addEventListener("click", () => playLoop(btn[0].id))
@@ -121,33 +100,18 @@ function loopComponent(loop, idx) {
   return div
 }
 
-async function refreshSavedLoops(videoId) {
-  // Clean loops first.
-  const div = document.getElementById("div-saved-loops")
-  div.textContent = ""
-
-  const savedLoops = await window.getLoopsFromFirebase(videoId)
-  console.log(savedLoops)
-  savedLoops.forEach((loop, idx) => {
-    console.log(loop)
-    div.appendChild(loopComponent(loop, idx))
-  })
-}
-
 function removeLoop(clickedId) {
   if (confirm("Delete loop?")) {
     // 1. Remove the list item from page.
-    const id = clickedId.split("-").pop()
-    console.log(id)
-    const div_id = `div-saved-loop-${id}`
+    const id = clickedId.split("_").pop()
+    const div_id = `div-saved-loop_${id}`
     const elem = document.getElementById(div_id)
-    const name = elem.getAttribute("name")
     elem.remove()
     console.log(`Clicked ${clickedId}`)
 
     // 2. Remove the record from storage.
     const data = PLAYER.getVideoData()
-    removeStore(data.video_id, name)
+    removeStore(data.video_id, id)
   }
 }
 
@@ -155,21 +119,15 @@ function playLoop(clickedId) {
   const videoId = PLAYER.getVideoData().video_id
   const info = getStore(videoId)
 
-  const id = clickedId.split("-").pop()
-  const div_id = `div-saved-loop-${id}`
+  const id = clickedId.split("_").pop()
+  const div_id = `div-saved-loop_${id}`
   const elem = document.getElementById(div_id)
   console.log(elem)
-  const name = elem.getAttribute("name")
 
-  for (loop of info.loops) {
-    if (loop.name == name) {
-      LOOPER.startTime = loop.start
-      LOOPER.endTime = loop.end
-      PLAYER.seekTo(LOOPER.startTime)
-      console.log("found!")
-      break
-    }
-  }
+  const times = id.split("-")
+  LOOPER.startTime = +times[0]
+  LOOPER.endTime = +times[1]
+  PLAYER.seekTo(LOOPER.startTime)
 
   console.log(`Clicked ${clickedId}`)
 }
@@ -204,52 +162,18 @@ function getIdFromSharedUrl(url) {
   return id
 }
 
-
-function exportData() {
-  // Copy localStorage to clipboard.
-  // https://www.w3schools.com/howto/howto_js_copy_clipboard.asp
-  // https://stackoverflow.com/questions/69438702/why-does-navigator-clipboard-writetext-not-copy-text-to-clipboard-if-it-is-pro
-  navigator.clipboard.writeText(
-    JSON.stringify(localStorage)
-  ).then(() => {
-    console.log("Copied data to clipboard!")
-    alert("App data to copied to clipboard!")
-  }).catch(() => {
-    alert("something went wrong")
-  })
-}
-
-async function importData() {
-  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/await
-  // https://stackoverflow.com/questions/13335967/export-data-in-localstorage-for-later-re-import
-  const strData = await navigator.clipboard.readText()
-
-  if (confirm("Import data from clipboard?")) {
-    const data = JSON.parse(strData)
-    Object.keys(data).forEach((k) => {
-      localStorage.setItem(k, data[k])
-    })
-    console.log("Imported data from clipboard!")
-    render()
-  }
-}
-
 function removeCurrentVideo() {
   const info = PLAYER.getVideoData()
   const videoId = info.video_id
   const title = info.title
   if (confirm(`Delete data for ${title}?`)) {
     localStorage.removeItem(videoId)
-    render()
   }
 }
 
 function run() {
   console.log("Loaded ui.js")
   
-  // Set up storage for the first time, if needed.
-  initStorage()
-
   // Show the list of tracks saved for current video.
   const saved_loops = document.getElementById("ul-saved-loops")
 
@@ -299,8 +223,6 @@ function run() {
   addClickListener("btn-restart-loop", restartLoop)
   addClickListener("btn-save-loop", () => LOOPER.save())
   addClickListener("btn-clear-loop", () => LOOPER.reset())
-  addClickListener("btn-export-data", exportData)
-  addClickListener("btn-import-data", importData)
   addClickListener("btn-clear-cache", clearStorage)
   addClickListener("btn-remove-video", removeCurrentVideo)
 }

@@ -8,7 +8,8 @@ import {
     setDoc,
     updateDoc,
     collection,
-    deleteDoc
+    deleteDoc,
+    onSnapshot,
 } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js"
 import {
     GoogleAuthProvider,
@@ -37,9 +38,9 @@ const analytics = getAnalytics(window.fbApp)
 
 const db = getFirestore(window.fbApp)
 
-const videoId = ["JyjFCbB6qhA", "sK0J62VFC78"]
-const title = ["Dreamer - Kiefer", "Blue Serge - Bill Evans"]
-const user = "alui"
+// const videoId = ["JyjFCbB6qhA", "sK0J62VFC78"]
+// const title = ["Dreamer - Kiefer", "Blue Serge - Bill Evans"]
+// const user = "alui"
 
 // Insert data.
 // for (let i=0; i<2; i++) {
@@ -62,50 +63,87 @@ const user = "alui"
 const auth = getAuth(window.fbApp)
 async function handleGoogleAuth(event) {
     const provider = new GoogleAuthProvider()
-    window.CRED = await signInWithPopup(auth, provider)
-    const uid = window.CRED.user.uid
+    const credentials = await signInWithPopup(auth, provider)
+    const uid = credentials.user.uid
     const today = new Date()
     console.log(`Logged in as ${uid}`)
 
+    function loadVideos() {
+        const docs = collection(db, "users", uid, "videoId")
+        onSnapshot(docs, (snapshot) => {
+            console.log("Repopulate videos.")
+
+            const selection = document.getElementById("select-video-names")
+            selection.innerHTML = "<option disabled selected value>-- select saved video --</option>"
+
+            snapshot.forEach(doc => {
+              let data = doc.data()
+              const option = document.createElement("option")
+              option.setAttribute("video-id", doc.id)
+              option.value = info.title
+              option.textContent = option.value
+              selection.appendChild(option)
+            })
+
+            selection.addEventListener("change", () => {
+              const selectedItem = selection.options.item(selection.selectedIndex)
+              const videoId = selectedItem.getAttribute("video-id")
+              console.log(`Loading ${videoId}...`)
+              window.LOOPER.reset()
+              window.PLAYER.cueVideoById(videoId, 0)
+            })
+        })
+    }
+
+    // Listen to changes videoId collection. Update UI accordingly.
+    window.listenDoc = async (videoId) => {
+        const docs = collection(db, "users", uid, "videoId", videoId, "loops")
+
+        // Attempt to stop listening to any changes to documents in the
+        // videoId's collection.
+        try {
+            window.unsubscribe()
+        } catch {
+            console.log("No active listeners to unsubscribe.")
+        }
+
+        window.unsubscribe = onSnapshot(docs, (snapshot) => {
+            console.log("Reload loops.")
+
+            const div = document.getElementById("div-saved-loops")
+            div.textContent = ""
+
+            snapshot.forEach(doc => {
+              let data = doc.data()
+              div.appendChild(window.loopComponent(data))
+            })
+        })
+    }
+
+    // Append a single loop.
     window.appendFirebase = async (videoId, newItem) => {
-        console.log(newItem.name)
-        console.log(newItem)
-        await setDoc(
-            doc(db, `users/${uid}/videoId/${videoId}/loops/${newItem.name}`),
-            newItem,
-            {merge: true}
+        const ref = doc(
+            db, "users", uid, "videoId", videoId, "loops", newItem.name
         )
+        await setDoc(ref, newItem, {merge: true})
     }
 
-    // untested
-    window.getLoopsFromFirebase = async function (videoId) {
-        const loops = await getDocs(
-            collection(db, `users/${uid}/videoId/${videoId}/loops`)
-        )
-        const loops_ = []
-        loops.forEach(loop => loops_.push(loop.data()))
-        return loops_
-    }
-
-    // untested
-    window.removeLoopFromFirebase = async function (videoId, name) {
+    // FIXME: Not removing from firebase?!
+    // Remove a single loop.
+    window.removeLoopFromFirebase = async (videoId, name) => {
         await deleteDoc(
-            doc(db, `users/${uid}/videoId/${videoId}/loop/${name}`)
+            doc(db, "users", uid, "videoId", videoId, "loops", name)
         )
     }
 
-    // untested
+    // untested. I think removing collection is not permitted in firestore.
     window.removeVideoFromFirebase = async function (videoId) {
         await deleteDoc(
             doc(db, `users/${uid}/videoId/${videoId}`)
         )
     }
 
-    // append instead of overwrite data.
-    // await setDoc(
-    //     doc(db, `users/${uid}/videoId/aaa`),
-    //     {date: `${today}`},
-    //     { merge: true }
-    // )
+    window.listenDoc(PLAYER.getVideoData().video_id)
+    loadVideos()
 }
 document.getElementById("btn-auth").addEventListener("click", handleGoogleAuth)
