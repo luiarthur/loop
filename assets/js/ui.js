@@ -171,6 +171,14 @@ function removeCurrentVideo() {
   }
 }
 
+async function loadVideoByUrl() {
+  let url = document.getElementById("input-yt-url").value
+  const videoId = getIdFromSharedUrl(url)
+  LOOPER.reset()
+  PLAYER.cueVideoById(videoId, 0)
+  window.listenDoc(videoId)
+}
+
 function run() {
   console.log("Loaded ui.js")
   
@@ -203,12 +211,6 @@ function run() {
     }
   })
 
-  addClickListener("btn-load-yt-url", () => {
-    let url = document.getElementById("input-yt-url").value
-    const videoId = getIdFromSharedUrl(url)
-    LOOPER.reset()
-    PLAYER.cueVideoById(videoId, 0)
-  })
 
   document.querySelectorAll(".input-yt").forEach(input => {
     input.addEventListener("change", event => {
@@ -220,6 +222,7 @@ function run() {
     })
   })
 
+  addClickListener("btn-load-yt-url", loadVideoByUrl)
   addClickListener("btn-restart-loop", restartLoop)
   addClickListener("btn-save-loop", () => LOOPER.save())
   addClickListener("btn-clear-loop", () => LOOPER.reset())

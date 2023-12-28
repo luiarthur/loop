@@ -8,8 +8,10 @@ import {
     setDoc,
     updateDoc,
     collection,
+    collectionGroup,
     deleteDoc,
     onSnapshot,
+    query, where
 } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js"
 import {
     GoogleAuthProvider,
@@ -65,34 +67,31 @@ async function handleGoogleAuth(event) {
     const provider = new GoogleAuthProvider()
     const credentials = await signInWithPopup(auth, provider)
     const uid = credentials.user.uid
-    const today = new Date()
     console.log(`Logged in as ${uid}`)
 
-    // FIXME: 28 Dec, 2023.
-    function loadVideos() {
-        const docs = collection(db, "users", uid, "videoId")
-        onSnapshot(docs, (snapshot) => {
-            console.log("Repopulate videos.")
-
+    // Repopulate previously saved videos.
+    async function loadVideos() {
+        const ref = await collection(db, "users", uid, "videoId")
+        onSnapshot(ref, snapshot => {
             const selection = document.getElementById("select-video-names")
             selection.innerHTML = "<option disabled selected value>-- select saved video --</option>"
 
             snapshot.forEach(doc => {
-              let data = doc.data()
-              console.log("data.id: " + data.id)
-              const option = document.createElement("option")
-              option.setAttribute("video-id", doc.id)
-              option.value = data.title
-              option.textContent = option.value
-              selection.appendChild(option)
+                console.log("data.id: " + doc.id)
+                let data = doc.data()
+                const option = document.createElement("option")
+                option.setAttribute("video-id", doc.id)
+                option.value = data.title
+                option.textContent = option.value
+                selection.appendChild(option)
             })
 
             selection.addEventListener("change", () => {
-              const selectedItem = selection.options.item(selection.selectedIndex)
-              const videoId = selectedItem.getAttribute("video-id")
-              console.log(`Loading ${videoId}...`)
-              window.LOOPER.reset()
-              window.PLAYER.cueVideoById(videoId, 0)
+                const selectedItem = selection.options.item(selection.selectedIndex)
+                const videoId = selectedItem.getAttribute("video-id")
+                console.log(`Loading ${videoId}...`)
+                window.LOOPER.reset()
+                window.PLAYER.cueVideoById(videoId, 0)
             })
         })
     }
@@ -104,6 +103,7 @@ async function handleGoogleAuth(event) {
         // Attempt to stop listening to any changes to documents in the
         // videoId's collection.
         try {
+            console.log("Unsubscribed to old changes.")
             window.unsubscribe()
         } catch {
             console.log("No active listeners to unsubscribe.")
@@ -128,6 +128,16 @@ async function handleGoogleAuth(event) {
             db, "users", uid, "videoId", videoId, "loops", newItem.name
         )
         await setDoc(ref, newItem, {merge: true})
+
+        const now = new Date()
+        await setDoc(
+            doc(db, "users", uid, "videoId", videoId),
+            {
+                lastUpdated: now.toISOString(),
+                title: PLAYER.getVideoData().title
+            },
+            {merge: true}
+        )
     }
 
     // FIXME: Not removing from firebase?!
@@ -145,7 +155,7 @@ async function handleGoogleAuth(event) {
         )
     }
 
-    window.listenDoc(PLAYER.getVideoData().video_id)
-    loadVideos()
+    await window.listenDoc(PLAYER.getVideoData().video_id)
+    await loadVideos()
 }
 document.getElementById("btn-auth").addEventListener("click", handleGoogleAuth)
