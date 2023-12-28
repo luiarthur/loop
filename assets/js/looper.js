@@ -24,7 +24,5 @@ class Looper {
     }
     newItem.name = `${newItem.start}-${newItem.end}`
     appendStore(data.video_id, newItem)
-
-    refreshSavedLoops(data.video_id)
   }
 }

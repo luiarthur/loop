@@ -68,6 +68,7 @@ async function handleGoogleAuth(event) {
     const today = new Date()
     console.log(`Logged in as ${uid}`)
 
+    // FIXME: 28 Dec, 2023.
     function loadVideos() {
         const docs = collection(db, "users", uid, "videoId")
         onSnapshot(docs, (snapshot) => {
