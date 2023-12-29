@@ -23,27 +23,6 @@ function clearStorage() {
 }
 
 
-function getOr(obj, key, defaultValue) {
-  if (!obj.hasOwnProperty(key)) {
-    obj.setItem(key, defaultValue)
-  }
-  return obj.getItem(key)
-}
-
-function getStore(videoId) {
-  return JSON.parse(
-    getOr(
-      localStorage,
-      videoId,
-      JSON.stringify({
-        title: PLAYER.getVideoData().title,
-        videoId: videoId,
-        loops: []
-      })
-    )
-  )
-}
-
 function appendStore(newItem) {
   console.log(`Adding loop: ${JSON.stringify(newItem)}`)
   window.appendFirebase(newItem)
@@ -90,16 +69,15 @@ function removeLoop(clickedId) {
 }
 
 function playLoop(clickedId) {
-  const videoId = PLAYER.getVideoData().video_id
-  const id = sanitizeName(`${clickedId.split("-").pop()}`)
-  const div_id = `div-saved-loop-${id}`
+  const videoId = sanitizeName(`${clickedId.split("-").pop()}`)
+  const div_id = `div-saved-loop-${videoId}`
   const elem = document.getElementById(div_id)
   console.log(elem)
 
-  console.log(id)
+  console.log(videoId)
   console.log(window.doc_data)
-  LOOPER.startTime = window.doc_data[id].start
-  LOOPER.endTime = window.doc_data[id].end
+  LOOPER.startTime = window.doc_data[videoId].start
+  LOOPER.endTime = window.doc_data[videoId].end
   PLAYER.seekTo(LOOPER.startTime)
 
   console.log(`Clicked ${clickedId}`)
