@@ -70,7 +70,7 @@ async function handleGoogleAuth(event) {
     const uid = credentials.user.uid
     console.log(`Logged in as ${uid}`)
 
-    window.render = () => {
+    window.render = async (currentVideoId) => {
         const data = window.doc_data
 
         // Repopulate current loops.
@@ -84,7 +84,7 @@ async function handleGoogleAuth(event) {
                 }
             })
         }
-        repopulateLoops(window.PLAYER.getVideoData().video_id)
+        repopulateLoops(currentVideoId)
 
         // Repopulate previous videos.
         const selection = document.getElementById("select-video-names")
@@ -116,7 +116,7 @@ async function handleGoogleAuth(event) {
     // Listen for changes in Firestore.
     window.unsubscribe = onSnapshot(doc(db, "users", uid), (doc) => {
         window.doc_data = doc.data()
-        render()
+        render(window.PLAYER.getVideoData().video_id)
     })
 
     // Append a single loop.

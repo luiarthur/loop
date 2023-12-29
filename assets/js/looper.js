@@ -1,3 +1,6 @@
+function sanitizeName(name) {
+    return name.replaceAll(/[.:-]/gi, "")
+}
 class Looper {
   constructor(player) {
     this.startTime = 0
@@ -25,8 +28,7 @@ class Looper {
       title: data.title
     }
     // Unique name.
-    let uname = `${newItem.videoId}_${loop.created}`
-    uname = uname.replace(":", "").replace("-", "")
+    let uname = sanitizeName(`${newItem.videoId}_${newItem.created}`)
     appendStore({[uname]: newItem})
   }
 }

@@ -58,7 +58,8 @@ window.loopComponent = (loop) => {
   const template = document.querySelector("#template-loop-item")
   const div = template.content.cloneNode(true).querySelector("div")
 
-  const uname = `${loop.videoId}_${loop.start}_${loop.end}`
+  let uname = sanitizeName(`${loop.videoId}_${loop.created}`)
+
   div.id += uname
   div.setAttribute("name", uname)
 
@@ -80,7 +81,7 @@ window.loopComponent = (loop) => {
 function removeLoop(clickedId) {
   if (confirm("Delete loop?")) {
     // 1. Remove the record from storage.
-    const id = clickedId.split("_").pop()
+    const id = clickedId.split("-").pop()
     console.log(`Clicked: ${clickedId}`)
 
     // This also updates the page.
@@ -89,14 +90,16 @@ function removeLoop(clickedId) {
 }
 
 function playLoop(clickedId) {
-  const id = clickedId.split("-").pop()
-  const div_id = `div_saved_loop-${id}`
+  const videoId = PLAYER.getVideoData().video_id
+  const id = sanitizeName(`${clickedId.split("-").pop()}`)
+  const div_id = `div-saved-loop-${id}`
   const elem = document.getElementById(div_id)
   console.log(elem)
 
-  const [_, startTime, endTime] = id.split("_")
-  LOOPER.startTime = +startTime
-  LOOPER.endTime = +endTime
+  console.log(id)
+  console.log(window.doc_data)
+  LOOPER.startTime = window.doc_data[id].start
+  LOOPER.endTime = window.doc_data[id].end
   PLAYER.seekTo(LOOPER.startTime)
 
   console.log(`Clicked ${clickedId}`)
@@ -128,7 +131,6 @@ function addClickListener(id, f) {
 function getIdFromSharedUrl(url) {
   const re = /youtu.be\/(\w+)/
   const id = url.match(re)[1]
-  console.log(id)
   return id
 }
 
@@ -136,9 +138,8 @@ async function loadVideoByUrl() {
   let url = document.getElementById("input-yt-url").value
   const videoId = getIdFromSharedUrl(url)
   LOOPER.reset()
-  await PLAYER.cueVideoById(videoId, 0)
-  console.log("load:" + PLAYER.getVideoData().video_id)
-  window.render()
+  PLAYER.cueVideoById(videoId, 0)
+  window.render(videoId)
 }
 
 function run() {

@@ -15,8 +15,8 @@
             ASD
           </h1>
 
-          <button id="btn-auth">Sign In</button>
-          <br>
+          <button id="btn-auth">Sign In with Google</button>
+          <br/>
 
           <div id="player-container">
             <div id="yt-player"></div>
@@ -53,11 +53,12 @@
             <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
               Settings
             </button>
+
+            <!-- TODO: Implement the interface. -->
             <ul class="dropdown-menu">
-              <li id="btn-import-data"><a class="dropdown-item" href="#">Import Data</a></li>
-              <li id="btn-export-data"><a class="dropdown-item" href="#">Export Data</a></li>
-              <li id="btn-remove-video"><a class="dropdown-item" href="#">Remove Video</a></li>
-              <li id="btn-clear-cache"><a class="dropdown-item" href="#">Delete All Data</a></li>
+              <li id="btn-import-data"><a class="dropdown-item disabled" href="#">Import Data</a></li>
+              <li id="btn-export-data"><a class="dropdown-item disabled" href="#">Export Data</a></li>
+              <li id="btn-clear-cache"><a class="dropdown-item disabled" href="#">Delete All Data</a></li>
             </ul>
           </div>
 
@@ -75,9 +76,9 @@
 
     <template id="template-loop-item">
       <div id="div-saved-loop_" class="loop-controls d-flex">
-        <button id="button-play_" class="p-2 flex-grow-1"></button>
-        <button id="button-edit_" class="p-2">Edit</button>
-        <button id="button-remove_" class="p-2">Remove</button>
+        <button id="button-play-" class="p-2 flex-grow-1"></button>
+        <button id="button-edit-" class="p-2">Edit</button>
+        <button id="button-remove-" class="p-2">Remove</button>
       </div>
     </template>
   </body>
