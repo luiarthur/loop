@@ -55,7 +55,11 @@ function onPlayerReady(event) {
     // Update current time.
     const currentTime = document.querySelector("#current-time")
     currentTime.textContent = secondsToMinuteSeconds(PLAYER.getCurrentTime())
+
   }, 200) // execute every 0.2 seconds.
+
+  // Connect Firebase.
+  window.connect()
 }
 
 function onPlayerStateChange(event) {

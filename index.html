@@ -16,6 +16,7 @@
           </h1>
 
           <button id="btn-auth">Sign In with Google</button>
+          <button id="btn-signout">Sign Out</button>
           <br/>
 
           <div id="player-container">
@@ -56,6 +57,7 @@
 
             <!-- TODO: Implement the interface. -->
             <ul class="dropdown-menu">
+              <li id="btn-rename-title"><a class="dropdown-item" href="#">Rename Title</a></li>
               <li id="btn-import-data"><a class="dropdown-item disabled" href="#">Import Data</a></li>
               <li id="btn-export-data"><a class="dropdown-item disabled" href="#">Export Data</a></li>
               <li id="btn-clear-cache"><a class="dropdown-item disabled" href="#">Delete All Data</a></li>
@@ -77,7 +79,7 @@
     <template id="template-loop-item">
       <div id="div-saved-loop_" class="loop-controls d-flex">
         <button id="button-play-" class="p-2 flex-grow-1"></button>
-        <button id="button-edit-" class="p-2">Edit</button>
+        <!-- <button id="button-edit-" class="p-2">Edit</button> -->
         <button id="button-remove-" class="p-2">Remove</button>
       </div>
     </template>

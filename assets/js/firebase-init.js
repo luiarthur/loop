@@ -17,6 +17,7 @@ import {
 import {
     GoogleAuthProvider,
     getAuth,
+    signOut,
     signInWithPopup
 } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js"
 
@@ -40,35 +41,44 @@ window.fbApp = initializeApp(firebaseConfig)
 const analytics = getAnalytics(window.fbApp)
 
 const db = getFirestore(window.fbApp)
-
-// const videoId = ["JyjFCbB6qhA", "sK0J62VFC78"]
-// const title = ["Dreamer - Kiefer", "Blue Serge - Bill Evans"]
-// const user = "alui"
-
-// Insert data.
-// for (let i=0; i<2; i++) {
-    // await setDoc(
-        // doc(db, `users/${user}/videoId/${videoId[i]}`),
-        // { "title": title[i] },
-        // { merge: true }
-    // )
-
-    // for (let j=0; j < 3; j++) {
-        // await setDoc(
-            // doc(db, `users/${user}/videoId/${videoId[i]}/loops/loop${j}`),
-            // { start: 2+j, end: 10+j },
-            // { merge: true }
-        // )
-    // }
-// }
-
-// Test auth
 const auth = getAuth(window.fbApp)
+
 async function handleGoogleAuth(event) {
     const provider = new GoogleAuthProvider()
-    const credentials = await signInWithPopup(auth, provider)
-    const uid = credentials.user.uid
-    console.log(`Logged in as ${uid}`)
+    await signInWithPopup(auth, provider)
+    connect()
+}
+    
+async function handleSignOut(event) {
+    signOut(auth).then(() => {
+        const div = document.getElementById("div-saved-loops")
+        div.textContent = ""
+
+        const selection = document.getElementById("select-video-names")
+        selection.innerHTML = "<option disabled selected value>-- select saved video --</option>"
+
+        console.log("Sign-out successful!")
+    }).catch((error) => {
+        console.log("An error occured during sign-out.")
+    })
+}
+
+function argsort(arr) {
+  return arr.map((val, idx) => [val, idx])
+            .sort(([a], [b]) => a > b ? 1 : -1)
+            .map(([, idx]) => idx)
+}
+
+async function connect() {
+    let uid
+    try {
+        uid = auth.currentUser.uid
+        console.log(`Logged in as ${uid}`)
+    } catch {
+        console.log("No sign-in detected.")
+        return
+    }
+    const ref = doc(db, "users", uid)
 
     window.render = async (currentVideoId) => {
         const data = window.doc_data
@@ -78,10 +88,21 @@ async function handleGoogleAuth(event) {
             const div = document.getElementById("div-saved-loops")
             div.textContent = ""
 
-            Object.values(data).forEach(item => {
-                if (item.videoId == videoId) {
-                    div.appendChild(window.loopComponent(item))
-                }
+            const loops = Object.values(data).filter(
+                item => item.videoId == videoId
+            )
+
+            const times = loops.map(loop => {
+                const start = window.secondsToMinuteSeconds(loop.start)
+                const end = window.secondsToMinuteSeconds(loop.end)
+                const out = `${start}-${end}`
+                console.log(out)
+                return out
+            })
+            const sortedIdx = argsort(times)
+
+            sortedIdx.forEach(i => {
+                div.appendChild(window.loopComponent(loops[i]))
             })
         }
         repopulateLoops(currentVideoId)
@@ -114,21 +135,33 @@ async function handleGoogleAuth(event) {
     }
 
     // Listen for changes in Firestore.
-    window.unsubscribe = onSnapshot(doc(db, "users", uid), (doc) => {
+    window.unsubscribe = onSnapshot(ref, (doc) => {
         window.doc_data = doc.data()
         render(window.PLAYER.getVideoData().video_id)
     })
 
     // Append a single loop.
     window.appendFirebase = async (newItem) => {
-        const ref = doc(db, "users", uid)
         await setDoc(ref, newItem, { merge: true })
     }
 
     // Remove a single loop.
     window.removeLoopFromFirebase = async (key) => {
-        await updateDoc(doc(db, "users", uid), {[key]: deleteField()})
+        await updateDoc(ref, {[key]: deleteField()})
     }
 
+    // Rename title of a video.
+    window.renameVideoTitle = async (videoId, newTitle) => {
+        const newItems = {}
+        Object.keys(window.doc_data).forEach(key => {
+            if (window.doc_data[key].videoId == videoId) {
+                newItems[key] = {...window.doc_data[key], title: newTitle}
+            }
+        })
+
+        await updateDoc(ref, newItems)
+    }
 }
+window.connect = connect
 document.getElementById("btn-auth").addEventListener("click", handleGoogleAuth)
+document.getElementById("btn-signout").addEventListener("click", handleSignOut)

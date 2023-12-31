@@ -1,6 +1,16 @@
 function sanitizeName(name) {
     return name.replaceAll(/[.:-]/gi, "")
 }
+
+function randomLetters(numLetters) {
+  let result = ""
+  const characters = "abcdefghijklmnopqrstuvwxyz"
+  for (let i = 0; i < numLetters; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length))
+  }
+  return result
+}
+
 class Looper {
   constructor(player) {
     this.startTime = 0
@@ -25,10 +35,11 @@ class Looper {
       start: round2(this.startTime),
       end: round2(this.endTime),
       videoId: data.video_id,
-      title: data.title
+      title: data.title,
+      uname: randomLetters(20)
     }
     // Unique name.
-    let uname = sanitizeName(`${newItem.videoId}_${newItem.created}`)
+    let uname = newItem.uname
     appendStore({[uname]: newItem})
   }
 }

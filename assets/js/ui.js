@@ -37,8 +37,7 @@ window.loopComponent = (loop) => {
   const template = document.querySelector("#template-loop-item")
   const div = template.content.cloneNode(true).querySelector("div")
 
-  let uname = sanitizeName(`${loop.videoId}_${loop.created}`)
-
+  const uname = loop.uname
   div.id += uname
   div.setAttribute("name", uname)
 
@@ -51,8 +50,8 @@ window.loopComponent = (loop) => {
 
   btn[0].textContent = timeRange
   btn[0].addEventListener("click", () => playLoop(btn[0].id))
-  btn[1].addEventListener("click", () => editLoop(btn[1].id))
-  btn[2].addEventListener("click", () => removeLoop(btn[2].id))
+  btn[1].addEventListener("click", () => removeLoop(btn[1].id))
+  // btn[1].addEventListener("click", () => editLoop(btn[1].id))
 
   return div
 }
@@ -120,6 +119,18 @@ async function loadVideoByUrl() {
   window.render(videoId)
 }
 
+function renameTitle() {
+  const data = PLAYER.getVideoData()
+  const videoId = data.video_id
+  const oldTitle = data.title
+  const newTitle = prompt("Please enter a new title:", oldTitle)
+  if (newTitle === null || newTitle == "") {
+    alert("Action cancelled. Video title not renamed.")
+  } else {
+    window.renameVideoTitle(videoId, newTitle)
+  }
+}
+
 function run() {
   console.log("Loaded ui.js")
   
@@ -168,6 +179,7 @@ function run() {
   addClickListener("btn-save-loop", () => LOOPER.save())
   addClickListener("btn-clear-loop", () => LOOPER.reset())
   addClickListener("btn-clear-cache", clearStorage)
+  addClickListener("btn-rename-title", renameTitle)
 }
 
 run()
