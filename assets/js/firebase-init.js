@@ -57,6 +57,8 @@ async function handleSignOut(event) {
         const selection = document.getElementById("select-video-names")
         selection.innerHTML = "<option disabled selected value>-- select saved video --</option>"
 
+        showAuthBtn("btn-auth")
+
         console.log("Sign-out successful!")
     }).catch((error) => {
         console.log("An error occured during sign-out.")
@@ -69,12 +71,21 @@ function argsort(arr) {
             .map(([, idx]) => idx)
 }
 
+function showAuthBtn(id) {
+    document.querySelectorAll(".auth").forEach(btn => {
+        btn.classList.add("hidden")
+    })
+    document.getElementById(id).classList.remove("hidden")
+}
+
 async function connect() {
     let uid
     try {
         uid = auth.currentUser.uid
+        showAuthBtn("btn-signout")
         console.log(`Logged in as ${uid}`)
     } catch {
+        showAuthBtn("btn-auth")
         console.log("No sign-in detected.")
         return
     }
