@@ -1,3 +1,16 @@
+function sanitizeName(name) {
+    return name.replaceAll(/[.:-]/gi, "")
+}
+
+function randomLetters(numLetters) {
+  let result = ""
+  const characters = "abcdefghijklmnopqrstuvwxyz"
+  for (let i = 0; i < numLetters; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length))
+  }
+  return result
+}
+
 class Looper {
   constructor(player) {
     this.startTime = 0
@@ -20,11 +33,13 @@ class Looper {
     const newItem = {
       created: date.toISOString(),
       start: round2(this.startTime),
-      end: round2(this.endTime)
+      end: round2(this.endTime),
+      videoId: data.video_id,
+      title: data.title,
+      uname: randomLetters(20)
     }
-    newItem.name = `${newItem.start}-${newItem.end}`
-    appendStore(data.video_id, newItem)
-
-    refreshSavedLoops(data.video_id)
+    // Unique name.
+    let uname = newItem.uname
+    appendStore({[uname]: newItem})
   }
 }

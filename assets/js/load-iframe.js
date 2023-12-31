@@ -45,7 +45,6 @@ function onPlayerReady(event) {
   LOOPER = new Looper(PLAYER)
 
   event.target.playVideo()
-  refreshSavedLoops(event.target.getVideoData().video_id)
 
   setInterval(() => {
     // Check if current time is out of bounds.
@@ -56,7 +55,11 @@ function onPlayerReady(event) {
     // Update current time.
     const currentTime = document.querySelector("#current-time")
     currentTime.textContent = secondsToMinuteSeconds(PLAYER.getCurrentTime())
+
   }, 200) // execute every 0.2 seconds.
+
+  // Connect Firebase.
+  window.connect()
 }
 
 function onPlayerStateChange(event) {
@@ -66,8 +69,9 @@ function onPlayerStateChange(event) {
   ])
 
   if (states.has(event.data)) {
-    refreshSavedLoops(event.target.getVideoData().video_id)
-    populateVideos()
+    // refreshSavedLoops(event.target.getVideoData().video_id)
+    // populateVideos()
+    const videoId = event.target.getVideoData().video_id
     LOOPER.reset()
   }
 }
