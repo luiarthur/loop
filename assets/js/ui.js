@@ -68,18 +68,18 @@ function removeLoop(clickedId) {
 }
 
 function playLoop(clickedId) {
-  const videoId = sanitizeName(`${clickedId.split("-").pop()}`)
+  const videoId = clickedId.split("-").pop()
   LOOPER.startTime = window.doc_data[videoId].start
   LOOPER.endTime = window.doc_data[videoId].end
   PLAYER.seekTo(LOOPER.startTime)
 
-  console.log(`Clicked ${clickedId}`)
+  console.log(`Clicked: ${clickedId}`)
 }
 
 function editLoop(clickedId) {
   // TODO
   alert("'Edit' is not implemented")
-  console.log(`Clicked ${clickedId}`)
+  console.log(`Clicked: ${clickedId}`)
 }
 
 function outOfBounds(looper, player) {
