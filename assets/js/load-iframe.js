@@ -7,9 +7,13 @@ console.log("Loaded load-iframe.js")
 // Globals.
 var PLAYER, LOOPER;
 
-// TODO: set initialVideoID to be the last viewed video id.
-// const videoID = "sK0J62VFC78" // Blue Serve -- Bill Evans
-const initialVideoID = "JyjFCbB6qhA" // Dreamer -- Kiefer
+function getInitialVideoId() {
+  // const blueSergeVideoId = "sK0J62VFC78" // Blue Serve -- Bill Evans
+  const lastVideoId = localStorage.getItem("lastVideoId")
+  const dreamerVideoId = "JyjFCbB6qhA" // Dreamer -- Kiefer
+  return (lastVideoId === null) ? dreamerVideoId : lastVideoId
+}
+const initialVideoId = getInitialVideoId()
 
 // 2. This code loads the IFrame Player API code asynchronously.
 function loadYouTubeIFrame() {
@@ -27,7 +31,7 @@ function onYouTubeIframeAPIReady() {
   PLAYER = new YT.Player('yt-player', {
     height: '350',
     width: '100%',
-    videoId: initialVideoID,
+    videoId: initialVideoId,
     playerVars: {
       playsinline: 1,
       autoplay: 0,

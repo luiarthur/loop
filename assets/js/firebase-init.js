@@ -96,6 +96,7 @@ async function connect() {
 
         // Repopulate current loops.
         function repopulateLoops(videoId) {
+            localStorage.setItem("lastVideoId", videoId)
             const div = document.getElementById("div-saved-loops")
             div.textContent = ""
 

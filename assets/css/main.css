@@ -32,3 +32,6 @@ button:active {
 .center {
   text-align: center;
 }
+button.auth {
+  float: right;
+}
