@@ -96,7 +96,6 @@ async function connect() {
                 const start = window.secondsToMinuteSeconds(loop.start)
                 const end = window.secondsToMinuteSeconds(loop.end)
                 const out = `${start}-${end}`
-                console.log(out)
                 return out
             })
             const sortedIdx = argsort(times)
