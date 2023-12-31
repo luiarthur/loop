@@ -69,12 +69,6 @@ function removeLoop(clickedId) {
 
 function playLoop(clickedId) {
   const videoId = sanitizeName(`${clickedId.split("-").pop()}`)
-  const div_id = `div-saved-loop-${videoId}`
-  const elem = document.getElementById(div_id)
-  console.log(elem)
-
-  console.log(videoId)
-  console.log(window.doc_data)
   LOOPER.startTime = window.doc_data[videoId].start
   LOOPER.endTime = window.doc_data[videoId].end
   PLAYER.seekTo(LOOPER.startTime)
@@ -131,39 +125,35 @@ function renameTitle() {
   }
 }
 
+function startLoop() {
+  LOOPER.startTime = PLAYER.getCurrentTime()
+  if (LOOPER.endTime === Infinity) {
+    LOOPER.endTime = PLAYER.getDuration()
+  }
+
+  if(LOOPER.startTime < LOOPER.endTime) {
+    const start = secondsToMinuteSeconds(LOOPER.startTime)
+    setTextById("btn-start-loop", `Start (${start})`)
+  } else {
+    setTextById("btn-end-loop", `End`)
+  }
+}
+
+function endLoop() {
+  LOOPER.endTime = PLAYER.getCurrentTime()
+  if(LOOPER.startTime < LOOPER.endTime) {
+    const end = secondsToMinuteSeconds(LOOPER.endTime)
+    setTextById("btn-end-loop", `End (${end})`)
+  } else {
+    LOOPER.startTime = 0
+    setTextById("btn-start-loop", `Start`)
+  }
+}
+
 function run() {
   console.log("Loaded ui.js")
   
-  // Show the list of tracks saved for current video.
-  const saved_loops = document.getElementById("ul-saved-loops")
-
   // Event Listeners.
-  addClickListener("btn-start-loop", () => {
-    LOOPER.startTime = PLAYER.getCurrentTime()
-    if (LOOPER.endTime === Infinity) {
-      LOOPER.endTime = PLAYER.getDuration()
-    }
-
-    if(LOOPER.startTime < LOOPER.endTime) {
-      const start = secondsToMinuteSeconds(LOOPER.startTime)
-      setTextById("btn-start-loop", `Start (${start})`)
-    } else {
-      setTextById("btn-end-loop", `End`)
-    }
-  })
-
-  addClickListener("btn-end-loop", () => {
-    LOOPER.endTime = PLAYER.getCurrentTime()
-    if(LOOPER.startTime < LOOPER.endTime) {
-      const end = secondsToMinuteSeconds(LOOPER.endTime)
-      setTextById("btn-end-loop", `End (${end})`)
-    } else {
-      LOOPER.startTime = 0
-      setTextById("btn-start-loop", `Start`)
-    }
-  })
-
-
   document.querySelectorAll(".input-yt").forEach(input => {
     input.addEventListener("change", event => {
       document.querySelectorAll(".yt-input-section").forEach(input_ => {
@@ -174,11 +164,12 @@ function run() {
     })
   })
 
+  addClickListener("btn-start-loop", startLoop)
+  addClickListener("btn-end-loop", endLoop)
   addClickListener("btn-load-yt-url", loadVideoByUrl)
   addClickListener("btn-restart-loop", restartLoop)
   addClickListener("btn-save-loop", () => LOOPER.save())
   addClickListener("btn-clear-loop", () => LOOPER.reset())
-  addClickListener("btn-clear-cache", clearStorage)
   addClickListener("btn-rename-title", renameTitle)
 }
 
