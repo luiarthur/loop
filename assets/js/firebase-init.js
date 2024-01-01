@@ -55,7 +55,7 @@ async function handleSignOut(event) {
 
         document.getElementById("profileImg").remove()
 
-        showAuthBtn("btn-auth")
+        showAuthBtn("btn-login")
 
         console.log("Sign-out successful!")
     }).catch((error) => {
