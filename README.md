@@ -1,5 +1,5 @@
-# asd
-Amazing Slow Downer replacement for YouTube tracks
+# loop
+My replacement for Amazing Slow Downer, for YouTube tracks only.
 
 # Resources
 - [YT Web API][1]
