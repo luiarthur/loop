@@ -11,13 +11,27 @@
     <div class="container" id="app">
       <div class="row">
         <div class="col-lg-8 offset-lg-2 col-md-10 offset-md-1">
-          <h1 id="app-name" class="center">
-            loop
-          </h1>
+          <div class="loop-banner">
+            <div class="loop-banner-title">loop</div>
 
-          <button class="hidden auth" id="btn-auth">Sign In with Google</button>
-          <button class="hidden auth" id="btn-signout">Sign Out</button>
-          <br/>
+            <button class="hidden auth" id="btn-login">
+              Sign In with Google
+            </button>
+
+            <div id="profileImgWrapper" class="hidden auth"
+                dropdown-toggle" type="button" data-bs-toggle="dropdown" 
+                aria-expanded="false">
+              <ul class="dropdown-menu">
+                <li id="btn-rename-title">
+                  <a class="dropdown-item" href="#">Rename Title</a>
+                </li>
+                <li id="btn-signout">
+                  <a class="dropdown-item" href="#">Sign Out</a>
+                </li>
+              </ul>
+            </div>
+
+          </div>
 
           <div id="player-container">
             <div id="yt-player"></div>
@@ -48,21 +62,6 @@
           </div>
 
           <div id="div-saved-loops"></div>
-
-          <br/>
-          <div class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-              Settings
-            </button>
-
-            <!-- TODO: Implement the interface. -->
-            <ul class="dropdown-menu">
-              <li id="btn-rename-title"><a class="dropdown-item" href="#">Rename Title</a></li>
-              <!-- <li id="btn-import-data"><a class="dropdown-item disabled" href="#">Import Data</a></li>
-              <li id="btn-export-data"><a class="dropdown-item disabled" href="#">Export Data</a></li>
-              <li id="btn-clear-cache"><a class="dropdown-item disabled" href="#">Delete All Data</a></li> -->
-            </ul>
-          </div>
 
           <!--
             - Enable saving loops to FireCloud (or localStorage).

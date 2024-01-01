@@ -4,15 +4,10 @@ import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.5.0/firebase
 import {
     getFirestore,
     doc,
-    getDocs,
     setDoc,
     updateDoc,
     deleteField,
-    collection,
-    collectionGroup,
-    deleteDoc,
     onSnapshot,
-    query, where
 } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js"
 import {
     GoogleAuthProvider,
@@ -42,6 +37,7 @@ const analytics = getAnalytics(window.fbApp)
 
 const db = getFirestore(window.fbApp)
 const auth = getAuth(window.fbApp)
+window.auth = auth // REMOVE
 
 async function handleGoogleAuth(event) {
     const provider = new GoogleAuthProvider()
@@ -56,6 +52,8 @@ async function handleSignOut(event) {
 
         const selection = document.getElementById("select-video-names")
         selection.innerHTML = "<option disabled selected value>-- select saved video --</option>"
+
+        document.getElementById("profileImg").remove()
 
         showAuthBtn("btn-auth")
 
@@ -82,13 +80,25 @@ async function connect() {
     let uid
     try {
         uid = auth.currentUser.uid
-        showAuthBtn("btn-signout")
-        console.log(`Logged in as ${uid}`)
+        const displayName = auth.currentUser.displayName
+        // showAuthBtn("btn-signout")
+        showAuthBtn("profileImgWrapper")
+        console.log(`Logged in as ${uid}: ${displayName}`)
     } catch {
-        showAuthBtn("btn-auth")
+        showAuthBtn("btn-login")
         console.log("No sign-in detected.")
         return
     }
+    
+    // Add profile picture.
+    const photoURL = auth.currentUser.photoURL
+    const imgWrapper = document.getElementById("profileImgWrapper")
+    const profileImg = document.createElement("img")
+    profileImg.src = photoURL
+    profileImg.classList.add("loop-banner-img")
+    profileImg.id = "profileImg"
+    imgWrapper.appendChild(profileImg)
+
     const ref = doc(db, "users", uid)
 
     window.render = async (currentVideoId) => {
@@ -174,5 +184,5 @@ async function connect() {
     }
 }
 window.connect = connect
-document.getElementById("btn-auth").addEventListener("click", handleGoogleAuth)
+document.getElementById("btn-login").addEventListener("click", handleGoogleAuth)
 document.getElementById("btn-signout").addEventListener("click", handleSignOut)
