@@ -100,10 +100,7 @@ function addClickListener(id, f) {
 }
 
 function getIdFromSharedUrl(url) {
-  // TODO: Remove this comment:
-  // const re = /youtu.be\/(\w+)/
-
-  const re = /youtu.be\/([^\/]+)/
+  const re = /youtu.be\/([\w_-]+)/
   const id = url.match(re)[1]
   return id
 }
