@@ -76,6 +76,14 @@ function showAuthBtn(id) {
     document.getElementById(id).classList.remove("hidden")
 }
 
+
+function sortByValue(obj) {
+    // Sort an object by value. Value must be strings.
+    return Object.entries(obj).sort(([, value1], [, value2]) => {
+        return value1.localeCompare(value2)
+    })
+}
+
 async function connect() {
     let uid
     try {
@@ -133,15 +141,17 @@ async function connect() {
         selection.innerHTML = "<option disabled selected value>-- select saved video --</option>"
 
         // Store unique video ids and titles in an Object.
-        const title = {}
+        const _title = {}
         Object.values(data).forEach(item => {
-            title[item.videoId] = item.title
+            _title[item.videoId] = item.title
         })
+        const title = sortByValue(_title)
 
-        Object.keys(title).forEach(id => {
+        // iterate over videoId -> title.
+        title.forEach(([vid, t]) => {
             const option = document.createElement("option")
-            option.setAttribute("video-id", id)
-            option.value = title[id]
+            option.setAttribute("video-id", vid)
+            option.value = t
             option.textContent = option.value
             selection.appendChild(option)
         })
