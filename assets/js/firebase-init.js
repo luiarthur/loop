@@ -138,7 +138,7 @@ async function connect() {
             title[item.videoId] = item.title
         })
 
-        Object.keys(title).forEach(id => {
+        Object.keys(title).sort().forEach(id => {
             const option = document.createElement("option")
             option.setAttribute("video-id", id)
             option.value = title[id]
